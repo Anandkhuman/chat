@@ -310,7 +310,7 @@
                 const oldName = username;
                 username = newName.trim();
                 localStorage.setItem('firebase-chat-username', username);
-                welcomeMessage.textContent = `Welcome, ${username}`;
+                welcomeMessage.textContent = `Welcome, ${username}!`;
                 if (currentRoomRef) {
                     membersRef.child(userId).set({ username });
                     messagesRef.push({ type: 'name-change', oldName: oldName, newName: username, timestamp: firebase.database.ServerValue.TIMESTAMP });
