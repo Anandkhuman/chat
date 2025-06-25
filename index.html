@@ -26,6 +26,7 @@
         .app-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
         .screen { display: none; width: 100%; max-width: 420px; opacity: 0; transform: scale(0.95); }
         .screen.active { display: block; opacity: 1; transform: scale(1); }
+        #chat-screen { max-width: 750px; }
         .card {
             background-color: var(--card-bg); padding: 30px 35px; border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); text-align: center; border: 1px solid #333;
@@ -57,8 +58,28 @@
         .room-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         #enter-room-btn { grid-column: 1 / -1; background-color: var(--success-color); }
         #enter-room-btn:hover { background-color: #36fddc; }
-        .chat-container { width: 100%; max-width: 700px; height: 90vh; background: var(--card-bg); border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid #333; }
-        .chat-header { padding: 15px 20px; background: #2a2a2a; border-radius: 15px 15px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .chat-container {
+            width: 100%;
+            max-width: 700px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 30, 0.65);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .chat-header {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
         #leave-btn { width: auto; padding: 8px 20px; font-size: 0.9rem; background: var(--danger-color); color: white; }
         .messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
         .message { margin-bottom: 15px; max-width: 75%; display: flex; flex-direction: column; }
@@ -70,22 +91,28 @@
         .message.received .message-bubble { background: #363636; color: var(--text-color); border-bottom-left-radius: 5px; }
         .message .timestamp { font-size: 0.7rem; color: #888; margin-top: 5px; margin-left: 12px; margin-right: 12px; }
         .message.system { align-self: center; text-align: center; font-style: italic; color: #888; font-size: 0.8rem; background: #2c2c2c; padding: 5px 15px; border-radius: 20px; }
-        .chat-input-form { display: flex; padding: 15px; border-top: 1px solid #333; gap: 10px; }
+        .chat-input-form { display: flex; padding: 15px; border-top: 1px solid rgba(255, 255, 255, 0.18); background: transparent; gap: 10px; }
         .chat-input-form input { margin-bottom: 0; }
         .chat-input-form button { width: auto; padding: 0 25px; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; color: white; font-size: 1.2rem; flex-direction: column; }
-
-        /* Room List Styles */
+        .header-title-group { display: flex; align-items: center; gap: 15px; }
+        .header-icon-btn {
+            all: unset;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 1rem;
+            transition: color 0.3s, transform 0.2s;
+        }
+        .header-icon-btn:hover { color: var(--secondary-color); }
+        .header-icon-btn:active { transform: scale(0.9); }
         #room-list-screen .card { max-width: 500px; width: 95%; }
         #public-rooms-container { max-height: 60vh; overflow-y: auto; margin-top: 20px; padding-right: 10px; }
         .room-list-item { background: var(--input-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
         .room-list-item .info h4 { margin: 0; color: white; }
         .room-list-item .info span { font-size: 0.8rem; color: #aaa; }
-        .room-list-item .actions { display: flex; gap: 8px; }
+        .room-list-item .actions { display: flex; align-items: center; gap: 8px; }
         .room-list-item .actions button { width: auto; padding: 8px 12px; font-size: 0.9rem; }
         .room-list-item .actions .delete-btn { background-color: var(--danger-color); color: white; }
-
-        /* Create Room Modal Styles */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-overlay.active { display: flex; }
         .modal-content { width: 100%; max-width: 400px; }
@@ -165,7 +192,13 @@
         </div>
         <div id="chat-screen" class="screen">
             <div class="chat-container">
-                <div class="chat-header"><h3 id="chat-room-title">Chat Room</h3><button id="leave-btn"><i class="fas fa-sign-out-alt"></i> Leave</button></div>
+                <div class="chat-header">
+                    <div class="header-title-group">
+                        <h3 id="chat-room-title">Chat Room</h3>
+                        <button id="share-current-room-btn" class="header-icon-btn" title="Share Room" style="display: none;"><i class="fas fa-share-alt"></i></button>
+                    </div>
+                    <button id="leave-btn"><i class="fas fa-sign-out-alt"></i> Leave</button>
+                </div>
                 <div class="messages" id="message-container"></div>
                 <form class="chat-input-form" id="chat-form"><input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off"><button type="submit">Send <i class="fas fa-paper-plane"></i></button></form>
             </div>
@@ -215,9 +248,10 @@
         const createRoomForm = document.getElementById('create-room-form');
         const cancelCreateRoomBtn = document.getElementById('cancel-create-room');
         const secretCodeGroup = document.getElementById('secret-code-group');
+        const shareCurrentRoomBtn = document.getElementById('share-current-room-btn');
 
         // --- App State ---
-        let username = '', currentRoomId = null, roomToJoinFromUrl = null;
+        let username = '', currentRoomId = null, currentRoomName = '', roomToJoinFromUrl = null;
         let currentRoomRef = null, messagesRef = null, membersRef = null;
         let messageListener = null, memberAddedListener = null, memberRemovedListener = null, roomListListener = null;
         let initialMembersLoaded = false;
@@ -286,7 +320,7 @@
         };
 
         const initLobby = () => {
-            welcomeMessage.textContent = `Welcome, ${username}!`;
+            welcomeMessage.textContent = `Welcome, ${username}`;
             rejoinContainer.innerHTML = '';
             const lastRoomInfo = JSON.parse(localStorage.getItem('firebase-chat-lastroom'));
             if (lastRoomInfo) {
@@ -310,7 +344,7 @@
                 const oldName = username;
                 username = newName.trim();
                 localStorage.setItem('firebase-chat-username', username);
-                welcomeMessage.textContent = `Welcome, ${username}!`;
+                welcomeMessage.textContent = `Welcome, ${username}`;
                 if (currentRoomRef) {
                     membersRef.child(userId).set({ username });
                     messagesRef.push({ type: 'name-change', oldName: oldName, newName: username, timestamp: firebase.database.ServerValue.TIMESTAMP });
@@ -329,15 +363,19 @@
 
         createRoomForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const roomName = document.getElementById('new-room-name').value.trim();
+            const roomNameInput = document.getElementById('new-room-name');
+            const secretCodeInput = document.getElementById('new-room-secret');
+            
+            const roomName = roomNameInput.value.trim();
             const roomType = createRoomForm.roomType.value;
-            const secretCode = document.getElementById('new-room-secret').value;
+            const secretCode = secretCodeInput.value;
 
             if (!roomName) { alert('Please enter a room name.'); return; }
             if (roomType === 'private' && !secretCode) { alert('Private rooms require a secret code.'); return; }
             
             const newRoomRef = db.ref('rooms').push();
             currentRoomId = newRoomRef.key;
+            currentRoomName = roomName;
             
             const roomData = {
                 name: roomName,
@@ -396,11 +434,14 @@
                                     <span><i class="fas fa-users"></i> ${memberCount} user(s) online</span>
                                 </div>
                                 <div class="actions">
+                                    <button class="share-btn" title="Share Room"><i class="fas fa-share-alt"></i></button>
                                     <button class="join-btn"><i class="fas fa-sign-in-alt"></i> Join</button>
-                                    ${room.creatorId === userId ? '<button class="delete-btn"><i class="fas fa-trash"></i> Delete</button>' : ''}
+                                    ${room.creatorId === userId ? '<button class="delete-btn" title="Delete Room"><i class="fas fa-trash"></i></button>' : ''}
                                 </div>
                             `;
                             roomEl.querySelector('.join-btn').onclick = () => joinRoom(roomId);
+                            roomEl.querySelector('.share-btn').onclick = (e) => shareRoom(roomId, room.name, e.currentTarget);
+                            
                             if (room.creatorId === userId) {
                                 roomEl.querySelector('.delete-btn').onclick = () => deleteRoom(roomId, room.name);
                             }
@@ -463,9 +504,9 @@
             membersRef = currentRoomRef.child('members');
 
             currentRoomRef.child('name').once('value', (snapshot) => {
-                const roomName = snapshot.val() || 'Chat Room';
-                chatRoomTitle.textContent = roomName;
-                localStorage.setItem('firebase-chat-lastroom', JSON.stringify({id: roomId, name: roomName}));
+                currentRoomName = snapshot.val() || 'Chat Room';
+                chatRoomTitle.textContent = currentRoomName;
+                localStorage.setItem('firebase-chat-lastroom', JSON.stringify({id: roomId, name: currentRoomName}));
             });
 
             const myMemberRef = membersRef.child(userId);
@@ -474,7 +515,8 @@
 
             listenForMessages();
             listenForMembers();
-
+            
+            shareCurrentRoomBtn.style.display = 'block';
             showScreen(screens.chat);
             history.pushState(null, '', `${window.location.pathname}?room=${roomId}`);
         };
@@ -486,8 +528,9 @@
                 if (memberAddedListener) membersRef.off('child_added', memberAddedListener);
                 if (memberRemovedListener) membersRef.off('child_removed', memberRemovedListener);
             }
-            currentRoomId = null; currentRoomRef = null;
+            currentRoomId = null; currentRoomName = ''; currentRoomRef = null;
             messageListener = memberAddedListener = memberRemovedListener = null;
+            shareCurrentRoomBtn.style.display = 'none';
             history.pushState(null, '', window.location.pathname);
             initLobby();
         });
@@ -545,19 +588,32 @@
             messageContainer.scrollTop = messageContainer.scrollHeight;
         };
         
-        // --- Utility Buttons (Share/Copy) ---
-        shareBtn.addEventListener('click', () => {
-            const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
-            const shareData = { title: 'Join My Sinths Chat Room!', text: `Let's chat! Join my room with this link.`, url: shareUrl };
+        // --- Reusable Share Functionality ---
+        const shareRoom = (roomId, roomName, buttonElement) => {
+            const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            const shareData = {
+                title: 'Join My Sintha Chat Room!',
+                text: `Let's chat in "${roomName}"! Join with this link.`,
+                url: shareUrl
+            };
+
             if (navigator.share) {
                 navigator.share(shareData).catch(err => console.log('Error sharing', err));
             } else {
                 navigator.clipboard.writeText(shareUrl).then(() => {
-                    shareBtn.innerHTML = '<i class="fas fa-check"></i> Link Copied!';
-                    setTimeout(() => { shareBtn.innerHTML = '<i class="fas fa-share-alt"></i> Share' }, 2000);
+                    if (buttonElement) {
+                        const originalContent = buttonElement.innerHTML;
+                        buttonElement.innerHTML = '<i class="fas fa-check"></i>';
+                        setTimeout(() => { buttonElement.innerHTML = originalContent; }, 2000);
+                    } else {
+                        alert('Room link copied to clipboard!');
+                    }
                 });
             }
-        });
+        };
+
+        shareBtn.addEventListener('click', (e) => shareRoom(currentRoomId, currentRoomName, e.currentTarget));
+        shareCurrentRoomBtn.addEventListener('click', (e) => shareRoom(currentRoomId, currentRoomName, e.currentTarget));
 
         copyCodeBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(currentRoomId).then(() => {
