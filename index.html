@@ -93,9 +93,9 @@
             padding: 10px 15px;
             border-radius: 20px;
             line-height: 1.4;
-            word-wrap: break-word; /* Fix for long text */
-            overflow-wrap: break-word; /* Modern standard */
-            word-break: break-word; /* More aggressive break for stubborn strings */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .message.sent .message-bubble { background: var(--primary-color); color: white; border-bottom-right-radius: 5px; }
         .message.received .message-bubble { background: #363636; color: var(--text-color); border-bottom-left-radius: 5px; }
@@ -125,12 +125,8 @@
         .radio-group { display: flex; gap: 20px; margin-bottom: 20px; }
         .form-actions { display: flex; gap: 10px; margin-top: 20px; }
         .delete-msg-btn {
-            all: unset;
-            cursor: pointer;
-            color: #888;
-            margin: 0 10px;
-            font-size: 0.9rem;
-            display: none;
+            all: unset; cursor: pointer; color: #888;
+            margin: 0 10px; font-size: 0.9rem; display: none;
             transition: color 0.3s;
         }
         .delete-msg-btn:hover { color: var(--danger-color); }
@@ -167,7 +163,6 @@
     </div>
     
     <div class="app-container">
-        <!-- ** FIX: Welcome screen is now active by default ** -->
         <div id="welcome-screen" class="screen active">
             <div class="card">
                 <h1><i class="fas fa-comments" style="color: var(--secondary-color);"></i> Sintha Chat</h1>
@@ -266,7 +261,7 @@
         // --- App State ---
         let username = '', currentRoomId = null, currentRoomName = '', roomToJoinFromUrl = null;
         let currentRoomRef = null, messagesRef = null, membersRef = null;
-        let messageListener = null, memberAddedListener = null, memberRemovedListener = null, roomListListener = null;
+        let messageAddedListener = null, messageRemovedListener = null, memberAddedListener = null, memberRemovedListener = null, roomListListener = null;
         let initialMembersLoaded = false;
         const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         let holdTimeout;
@@ -275,7 +270,7 @@
         const tl = gsap.timeline({ defaults: { duration: 0.4, ease: "power2.inOut" }});
         const showScreen = (screen) => {
             const currentActive = document.querySelector('.screen.active');
-            if (currentActive && currentActive !== screen) { // Prevent re-animating the same screen
+            if (currentActive && currentActive !== screen) {
                 tl.to(currentActive, { opacity: 0, scale: 0.95, onComplete: () => currentActive.classList.remove('active') });
             }
             tl.to(screen, { opacity: 1, scale: 1, onComplete: () => screen.classList.add('active') }, currentActive ? ">-0.2" : ">");
@@ -381,29 +376,22 @@
             e.preventDefault();
             const roomNameInput = document.getElementById('new-room-name');
             const secretCodeInput = document.getElementById('new-room-secret');
-            
             const roomName = roomNameInput.value.trim();
             const roomType = createRoomForm.roomType.value;
             const secretCode = secretCodeInput.value;
-
             if (!roomName) { alert('Please enter a room name.'); return; }
             if (roomType === 'private' && !secretCode) { alert('Private rooms require a secret code.'); return; }
-            
             const newRoomRef = db.ref('rooms').push();
             currentRoomId = newRoomRef.key;
             currentRoomName = roomName;
-            
             const roomData = { name: roomName, type: roomType, creatorId: userId, createdAt: firebase.database.ServerValue.TIMESTAMP };
             if (roomType === 'private') {
                 roomData.secretCode = secretCode;
             }
-
             newRoomRef.set(roomData);
-            
             createRoomModal.classList.remove('active');
             createRoomForm.reset();
             secretCodeGroup.style.display = 'none';
-
             roomCodeEl.textContent = currentRoomId;
             roomCodeDisplay.style.display = 'block';
             gsap.from(roomCodeDisplay, { opacity: 0, y: 20, duration: 0.3 });
@@ -426,7 +414,6 @@
         const listenForPublicRooms = () => {
             const roomsRef = db.ref('rooms');
             if (roomListListener) roomsRef.off('value', roomListListener);
-
             roomListListener = roomsRef.on('value', snapshot => {
                 publicRoomsContainer.innerHTML = '';
                 const rooms = snapshot.val();
@@ -440,19 +427,14 @@
                             const roomEl = document.createElement('div');
                             roomEl.className = 'room-list-item';
                             roomEl.innerHTML = `
-                                <div class="info">
-                                    <h4>${room.name}</h4>
-                                    <span><i class="fas fa-users"></i> ${memberCount} user(s) online</span>
-                                </div>
+                                <div class="info"><h4>${room.name}</h4><span><i class="fas fa-users"></i> ${memberCount} user(s) online</span></div>
                                 <div class="actions">
                                     <button class="share-btn" title="Share Room"><i class="fas fa-share-alt"></i></button>
                                     <button class="join-btn"><i class="fas fa-sign-in-alt"></i> Join</button>
                                     ${room.creatorId === userId ? '<button class="delete-btn" title="Delete Room"><i class="fas fa-trash"></i></button>' : ''}
-                                </div>
-                            `;
+                                </div>`;
                             roomEl.querySelector('.join-btn').onclick = () => joinRoom(roomId);
                             roomEl.querySelector('.share-btn').onclick = (e) => shareRoom(roomId, room.name, e.currentTarget);
-                            
                             if (room.creatorId === userId) {
                                 roomEl.querySelector('.delete-btn').onclick = () => deleteRoom(roomId, room.name);
                             }
@@ -468,13 +450,19 @@
 
         const deleteRoom = (roomId, roomName) => {
             if (confirm(`Are you sure you want to permanently delete the room "${roomName}"?`)) {
-                db.ref(`rooms/${roomId}`).remove()
-                    .then(() => console.log(`Room ${roomId} deleted.`))
-                    .catch(err => alert(`Error deleting room: ${err.message}`));
+                db.ref(`rooms/${roomId}`).remove().catch(err => alert(`Error: ${err.message}`));
             }
         };
 
         // --- Room Joining & Leaving Logic ---
+        const detachAllListeners = () => {
+            if (!currentRoomRef) return;
+            if (messageAddedListener) messagesRef.off('child_added', messageAddedListener);
+            if (messageRemovedListener) messagesRef.off('child_removed', messageRemovedListener);
+            if (memberAddedListener) membersRef.off('child_added', memberAddedListener);
+            if (memberRemovedListener) membersRef.off('child_removed', memberRemovedListener);
+        };
+
         enterRoomBtn.addEventListener('click', () => { if (currentRoomId) enterChatRoom(currentRoomId); });
         joinForm.addEventListener('submit', (e) => { e.preventDefault(); const code = joinCodeInput.value.trim(); if(code) joinRoom(code); });
         
@@ -487,15 +475,11 @@
                     joinCodeInput.value = '';
                     return;
                 }
-                
                 const room = snapshot.val();
                 if (room.type === 'private') {
                     const secret = prompt('This room is private. Please enter the secret code:');
-                    if (secret === room.secretCode) {
-                        enterChatRoom(roomId);
-                    } else {
-                        alert('Incorrect secret code.');
-                    }
+                    if (secret === room.secretCode) enterChatRoom(roomId);
+                    else alert('Incorrect secret code.');
                 } else {
                     enterChatRoom(roomId);
                 }
@@ -513,20 +497,16 @@
             currentRoomRef = db.ref(`rooms/${roomId}`);
             messagesRef = currentRoomRef.child('messages');
             membersRef = currentRoomRef.child('members');
-
             currentRoomRef.child('name').once('value', (snapshot) => {
                 currentRoomName = snapshot.val() || 'Chat Room';
                 chatRoomTitle.textContent = currentRoomName;
                 localStorage.setItem('firebase-chat-lastroom', JSON.stringify({id: roomId, name: currentRoomName}));
             });
-
             const myMemberRef = membersRef.child(userId);
             myMemberRef.onDisconnect().remove();
             myMemberRef.set({ username: username });
-
-            listenForMessages();
-            listenForMembers();
-            
+            listenForMessageEvents();
+            listenForMemberEvents();
             shareCurrentRoomBtn.style.display = 'block';
             showScreen(screens.chat);
             history.pushState(null, '', `${window.location.pathname}?room=${roomId}`);
@@ -535,38 +515,37 @@
         leaveBtn.addEventListener('click', () => {
             if (currentRoomRef) {
                 membersRef.child(userId).remove();
-                if (messageListener) messagesRef.off('child_added', messageListener);
-                if (memberAddedListener) membersRef.off('child_added', memberAddedListener);
-                if (memberRemovedListener) membersRef.off('child_removed', memberRemovedListener);
+                detachAllListeners();
             }
             currentRoomId = null; currentRoomName = ''; currentRoomRef = null;
-            messageListener = memberAddedListener = memberRemovedListener = null;
+            messageAddedListener = messageRemovedListener = memberAddedListener = memberRemovedListener = null;
             shareCurrentRoomBtn.style.display = 'none';
             history.pushState(null, '', window.location.pathname);
             initLobby();
         });
         
         // --- Real-time Listeners ---
-        const listenForMessages = () => {
-            if (messageListener) messagesRef.off('child_added', messageListener);
-            messageListener = messagesRef.orderByChild('timestamp').on('child_added', (snapshot) => {
+        const listenForMessageEvents = () => {
+            detachAllListeners();
+            messageAddedListener = messagesRef.orderByChild('timestamp').on('child_added', (snapshot) => {
                 displayMessage(snapshot.val(), snapshot.key);
+            });
+            messageRemovedListener = messagesRef.on('child_removed', (snapshot) => {
+                const messageElement = document.querySelector(`.message[data-key="${snapshot.key}"]`);
+                if (messageElement) {
+                    gsap.to(messageElement, { opacity: 0, height: 0, padding: 0, margin: 0, duration: 0.4, onComplete: () => messageElement.remove() });
+                }
             });
         };
 
-        const listenForMembers = () => {
-            if(memberAddedListener) membersRef.off('child_added', memberAddedListener);
-            if(memberRemovedListener) membersRef.off('child_removed', memberRemovedListener);
-            
+        const listenForMemberEvents = () => {
             membersRef.once('value', () => { initialMembersLoaded = true; });
             memberAddedListener = membersRef.on('child_added', (snapshot) => {
-                if (initialMembersLoaded && snapshot.key !== userId) {
-                    displaySystemMessage(`${snapshot.val().username} has joined the chat.`);
-                }
+                if (initialMembersLoaded && snapshot.key !== userId) displaySystemMessage(`${snapshot.val().username} has joined.`);
             });
             memberRemovedListener = membersRef.on('child_removed', (snapshot) => {
                 const member = snapshot.val();
-                if (member) displaySystemMessage(`${member.username} has left the chat.`);
+                if (member) displaySystemMessage(`${member.username} has left.`);
             });
         };
         
@@ -592,7 +571,6 @@
             div.classList.add('message');
             if (!msg || !msg.type) return;
             div.dataset.key = key;
-
             switch (msg.type) {
                 case 'system':
                 case 'name-change':
@@ -607,8 +585,7 @@
                             <div class="message-bubble">${msg.content}</div>
                             <div class="timestamp">${formatTimestamp(msg.timestamp)}</div>
                         </div>
-                        <button class="delete-msg-btn" title="Delete Message"><i class="fas fa-trash-alt"></i></button>
-                    `;
+                        <button class="delete-msg-btn" title="Delete Message"><i class="fas fa-trash-alt"></i></button>`;
                     if (msg.senderId === userId) {
                         const startHold = (e) => {
                             e.preventDefault();
@@ -624,8 +601,8 @@
                         div.addEventListener('mouseleave', endHold);
                         div.addEventListener('touchend', endHold);
                         div.querySelector('.delete-msg-btn').addEventListener('click', () => {
-                             if (confirm('Are you sure you want to delete this message?')) {
-                                messagesRef.child(key).remove().catch(err => console.error("Message deletion failed: ", err));
+                             if (confirm('Delete this message?')) {
+                                messagesRef.child(key).remove().catch(err => console.error("Msg delete failed: ", err));
                             }
                         });
                     }
@@ -640,7 +617,6 @@
         const shareRoom = (roomId, roomName, buttonElement) => {
             const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
             const shareData = { title: 'Join My Sintha Chat Room!', text: `Let's chat in "${roomName}"! Join with this link.`, url: shareUrl };
-
             if (navigator.share) {
                 navigator.share(shareData).catch(err => console.log('Error sharing', err));
             } else {
