@@ -86,13 +86,23 @@
         }
         .new-chat-btn:hover { color: var(--text-light); border-color: var(--primary); background: var(--bg-light); }
         
-        .sidebar-content { flex-grow: 1; overflow-y: auto; padding: 0.75rem; }
-        .conversation-item {
+        .sidebar-content { flex-grow: 1; overflow-y: auto; padding-top: 0.75rem; }
+        .sidebar-section-header {
+            padding: 1rem 1.5rem 0.5rem; font-size: 0.8rem;
+            font-weight: 600; text-transform: uppercase; color: var(--text-dark);
+            letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .sidebar-section-header .arrow { transition: transform 0.3s; }
+        .sidebar-section-header.collapsed .arrow { transform: rotate(-90deg); }
+        .sidebar-list { padding: 0 0.75rem; max-height: 1000px; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .sidebar-list.collapsed { max-height: 0; }
+
+        .conversation-item, .user-list-item {
             display: flex; align-items: center; padding: 0.75rem;
             cursor: pointer; transition: background-color 0.2s;
             border-radius: 0.5rem;
         }
-        .conversation-item:hover { background-color: var(--bg-light); }
+        .conversation-item:hover, .user-list-item:hover { background-color: var(--bg-light); }
         .conversation-item.active { background-color: var(--primary); }
         .conversation-item.active .name, .conversation-item.active .last-message { color: var(--bg-dark); }
         .conversation-item.active .avatar { background-color: var(--bg-dark); color: var(--primary); }
@@ -111,7 +121,7 @@
         }
         .item-details { overflow: hidden; }
         .item-details .name { font-weight: 500; color: var(--text-light); white-space: nowrap; text-overflow: ellipsis; }
-        .item-details .last-message { font-size: 0.875rem; color: var(--text-dark); white-space: nowrap; text-overflow: ellipsis; }
+        .item-details .last-message, .item-details .status { font-size: 0.875rem; color: var(--text-dark); white-space: nowrap; text-overflow: ellipsis; }
         
         .profile-section {
             padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);
@@ -136,6 +146,8 @@
             flex-grow: 1; display: grid; place-items: center; text-align: center;
             color: var(--text-dark);
         }
+        #welcome-screen h2 { font-size: 1.5rem; color: var(--text-medium); margin-bottom: 0.5rem;}
+        
         #messages-container {
             flex-grow: 1; padding: 1.5rem; overflow-y: auto;
             display: flex; flex-direction: column; gap: 0.25rem;
@@ -152,8 +164,10 @@
         .message-group.received .message-bubble { background-color: var(--bg-light); color: var(--text-light); border-bottom-left-radius: 0.375rem; }
         .sender-name { font-size: 0.8rem; font-weight: 500; color: var(--text-dark); margin: 0 0 0.5rem 0.5rem; }
         .message-meta { font-size: 0.75rem; text-align: right; opacity: 0.7; margin-top: 0.375rem; display: flex; align-items: center; gap: 0.375rem; }
-        .message-status-ticks { font-weight: bold; color: var(--bg-dark); }
-        .message-status-ticks.seen { color: var(--seen-color); }
+        .message-status-ticks { font-weight: bold; }
+        .message-status-ticks.sent-tick { color: var(--text-dark); }
+        .message-status-ticks.delivered-tick { color: var(--text-dark); }
+        .message-status-ticks.seen-tick { color: var(--seen-color); }
         
         #message-form-container { padding: 1rem 1.75rem; border-top: 1px solid var(--border-color); }
         #typing-indicator { height: 20px; font-size: 0.85rem; padding-bottom: 0.5rem; color: var(--text-dark); }
@@ -199,6 +213,7 @@
       <symbol id="icon-edit" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></symbol>
       <symbol id="icon-logout" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V5h10a1 1 0 100-2H3zm12.293 4.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L16.586 13H9a1 1 0 110-2h7.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" /></symbol>
       <symbol id="icon-send" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></symbol>
+      <symbol id="icon-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></symbol>
     </svg>
 
     <div id="landing-page">
@@ -234,7 +249,20 @@
                 <button id="new-chat-btn" class="new-chat-btn" title="New Chat"><svg class="icon"><use href="#icon-plus"></use></svg></button>
             </div>
             <div class="sidebar-content">
-                <ul id="my-chats-list"></ul>
+                <div id="my-chats-section">
+                    <div class="sidebar-section-header">
+                        <svg class="icon arrow"><use href="#icon-arrow"></use></svg>
+                        <span>My Chats</span>
+                    </div>
+                    <ul id="my-chats-list" class="sidebar-list"></ul>
+                </div>
+                <div id="all-users-section">
+                    <div class="sidebar-section-header">
+                        <svg class="icon arrow"><use href="#icon-arrow"></use></svg>
+                        <span>All Users</span>
+                    </div>
+                    <ul id="all-users-list" class="sidebar-list"></ul>
+                </div>
             </div>
             <div class="profile-section">
                 <div id="profile-avatar" class="avatar"></div>
@@ -247,7 +275,12 @@
         </aside>
         
         <main id="main-chat-window">
-             <div id="welcome-screen"><h2>Select a conversation to begin.</h2></div>
+             <div id="welcome-screen">
+                <div>
+                    <h2>Welcome to Sintha Chat</h2>
+                    <p id="welcome-typed"></p>
+                </div>
+             </div>
             <div id="chat-view" class="hidden">
                 <div class="chat-header"><span id="chat-header-title"></span></div>
                 <div id="messages-container"></div>
@@ -282,6 +315,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
@@ -308,9 +342,21 @@
         let conversationsListener, messageListener, typingListener, usersListener;
         let allUsersCache = {};
         const D = id => document.getElementById(id); // Helper
-        const [landingPage, chatApp, loginForm, signupForm, authError, myChatsList, currentUserNameEl, editNameBtn, signOutBtn, welcomeScreen, chatView, chatHeaderTitle, messagesContainer, messageForm, messageInput, typingIndicator, newChatBtn, newGroupModal, newGroupForm, createGroupCancelBtn, threeJsCanvas, profileAvatar, forgotPasswordLink, authToggleLink, sidebarTitle] = ['landing-page', 'chat-app', 'login-form', 'signup-form', 'auth-error', 'my-chats-list', 'current-user-name', 'edit-name-btn', 'sign-out-btn', 'welcome-screen', 'chat-view', 'chat-header-title', 'messages-container', 'message-form', 'message-input', 'typing-indicator', 'new-chat-btn', 'new-group-modal', 'new-group-form', 'create-group-cancel', 'three-js-canvas', 'profile-avatar', 'forgot-password-link', 'auth-toggle-link', 'sidebar-title'].map(D);
+        const [landingPage, chatApp, loginForm, signupForm, authError, myChatsList, allUsersList, currentUserNameEl, editNameBtn, signOutBtn, welcomeScreen, chatView, chatHeaderTitle, messagesContainer, messageForm, messageInput, typingIndicator, newChatBtn, newGroupModal, newGroupForm, createGroupCancelBtn, threeJsCanvas, profileAvatar, forgotPasswordLink, authToggleLink, sidebarTitle] = ['landing-page', 'chat-app', 'login-form', 'signup-form', 'auth-error', 'my-chats-list', 'all-users-list', 'current-user-name', 'edit-name-btn', 'sign-out-btn', 'welcome-screen', 'chat-view', 'chat-header-title', 'messages-container', 'message-form', 'message-input', 'typing-indicator', 'new-chat-btn', 'new-group-modal', 'new-group-form', 'create-group-cancel', 'three-js-canvas', 'profile-avatar', 'forgot-password-link', 'auth-toggle-link', 'sidebar-title'].map(D);
 
         // ----- 3. UI/HELPER FUNCTIONS -----
+        function renderAllUsers(users) {
+            allUsersList.innerHTML = '';
+            Object.entries(users).filter(([uid]) => uid !== currentUser.uid).forEach(([uid, user]) => {
+                const li = document.createElement('li');
+                li.className = 'user-list-item';
+                li.innerHTML = `<div class="avatar">${user.displayName.charAt(0).toUpperCase()}</div><div class="item-details"><div class="name">${user.displayName}</div><div class="status">${user.isOnline ? 'Online' : 'Offline'}</div></div>`;
+                if(user.isOnline) li.querySelector('.avatar').insertAdjacentHTML('beforeend', '<div class="online-indicator"></div>');
+                li.addEventListener('click', () => createNewChat([uid]));
+                allUsersList.appendChild(li);
+            });
+        }
+        
         function renderMyChats(chatsData) {
             myChatsList.innerHTML = '';
             if (chatsData.length === 0) {
@@ -344,7 +390,6 @@
                 li.addEventListener('click', () => selectChat(chat.id));
                 myChatsList.appendChild(li);
             });
-            gsap.from(myChatsList.children, { opacity: 0, y: 10, stagger: 0.05, duration: 0.3 });
         }
         
         async function selectChat(chatId) {
@@ -373,7 +418,7 @@
                 gsap.from(chatApp, { opacity: 0, duration: 0.5, delay: 0.5 });
                 initChatApp();
             } else {
-                [conversationsListener, messageListener, typingListener, usersListener].forEach(l => l && off(l.ref, l.type));
+                [conversationsListener, messageListener, typingListener, usersListener].forEach(l => l && l.ref && off(l.ref, l.type));
                 currentUser = null;
                 landingPage.style.opacity = '1';
                 landingPage.classList.remove('hidden');
@@ -389,6 +434,10 @@
             setupPresence();
             listenForUsers();
             listenForMyChats();
+            new Typed('#welcome-typed', {
+                strings: ['Select a conversation to begin.', 'Click the + to start a new chat.', 'Edit your profile below.'],
+                typeSpeed: 40, backSpeed: 20, backDelay: 2000, loop: true,
+            });
         }
         
         function setupPresence() {
@@ -398,14 +447,17 @@
         }
         
         function listenForUsers() {
-            if(usersListener) off(usersListener.ref, usersListener.type);
+            if(usersListener && usersListener.ref) off(usersListener.ref, usersListener.type);
             const usersRef = ref(db, 'users');
             usersListener = { ref: usersRef, type: 'value' };
-            onValue(usersRef, (snapshot) => { allUsersCache = snapshot.val() || {}; });
+            onValue(usersRef, (snapshot) => { 
+                allUsersCache = snapshot.val() || {}; 
+                renderAllUsers(allUsersCache);
+            });
         }
 
         function listenForMyChats() {
-            if(conversationsListener) off(conversationsListener.ref, conversationsListener.type);
+            if(conversationsListener && conversationsListener.ref) off(conversationsListener.ref, conversationsListener.type);
             const userChatsRef = ref(db, `userChats/${currentUser.uid}`);
             conversationsListener = { ref: userChatsRef, type: 'value' };
             onValue(userChatsRef, async (snapshot) => {
@@ -418,7 +470,7 @@
         }
         
         function listenForMessages(chatId, isGroup) {
-            if (messageListener) off(messageListener.ref, messageListener.type);
+            if (messageListener && messageListener.ref) off(messageListener.ref, messageListener.type);
             messagesContainer.innerHTML = '';
             const messagesRef = ref(db, `messages/${chatId}`);
             messageListener = { ref: messagesRef, type: 'value' };
@@ -428,7 +480,7 @@
                 const updates = {};
                 const sortedMessages = Object.entries(snapshot.val()).sort((a,b) => a[1].timestamp - b[1].timestamp);
 
-                sortedMessages.forEach(([msgId, msg], index) => {
+                sortedMessages.forEach(([msgId, msg]) => {
                     const isSent = msg.senderId === currentUser.uid;
                     let messageGroup = messagesContainer.lastElementChild;
                     if (!messageGroup || messageGroup.dataset.senderId !== msg.senderId) {
@@ -447,12 +499,17 @@
 
                     const ticksElement = bubble.querySelector('.message-status-ticks');
                     if (ticksElement) {
-                        ticksElement.classList.remove('seen');
-                        if (msg.status === 'seen') { ticksElement.innerHTML = '✓✓'; ticksElement.classList.add('seen'); }
-                        else { ticksElement.innerHTML = '✓'; }
+                        switch (msg.status) {
+                            case 'seen': ticksElement.innerHTML = '✓✓'; ticksElement.className = 'message-status-ticks seen-tick'; break;
+                            case 'delivered': ticksElement.innerHTML = '✓✓'; ticksElement.className = 'message-status-ticks delivered-tick'; break;
+                            default: ticksElement.innerHTML = '✓'; ticksElement.className = 'message-status-ticks sent-tick';
+                        }
                     }
-                    if (!isSent && msg.status !== 'seen') updates[`/messages/${chatId}/${msgId}/status`] = 'seen';
-                    if (index === sortedMessages.length - 1) gsap.from(bubble, { y: 20, opacity: 0, duration: 0.3, ease: 'power2.out' });
+                    if (!isSent && msg.status !== 'seen') {
+                        updates[`/messages/${chatId}/${msgId}/status`] = 'seen';
+                    } else if (!isSent && msg.status === 'sent') {
+                        updates[`/messages/${chatId}/${msgId}/status`] = 'delivered';
+                    }
                 });
                 
                 if (Object.keys(updates).length > 0) update(ref(db), updates);
@@ -461,7 +518,7 @@
         }
         
         function listenForTyping(chatId) {
-            if (typingListener) off(typingListener.ref, typingListener.type);
+            if (typingListener && typingListener.ref) off(typingListener.ref, typingListener.type);
             const typingRef = ref(db, `typing/${chatId}`);
             typingListener = { ref: typingRef, type: 'value' };
             onValue(typingRef, (snapshot) => {
@@ -515,11 +572,7 @@
                     })
                     .catch(error => {
                         authError.style.color = 'var(--error-color)';
-                        if (error.code === 'auth/user-not-found') {
-                            authError.textContent = "No user found with this email address.";
-                        } else {
-                            authError.textContent = "Error sending reset email. Please try again.";
-                        }
+                        authError.textContent = error.code === 'auth/user-not-found' ? "No user found with this email." : "Error sending reset email.";
                     });
             }
         });
@@ -587,6 +640,13 @@
             newGroupModal.querySelectorAll('.modal-user-list .conversation-item').forEach(item => {
                 const name = item.querySelector('.name').textContent.toLowerCase();
                 item.style.display = name.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+
+        ['my-chats-section', 'all-users-section'].forEach(id => {
+            D(id).querySelector('.sidebar-section-header').addEventListener('click', (e) => {
+                e.currentTarget.classList.toggle('collapsed');
+                D(id).querySelector('.sidebar-list').classList.toggle('collapsed');
             });
         });
         
