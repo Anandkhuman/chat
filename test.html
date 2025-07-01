@@ -13,8 +13,11 @@
             --bg-color: #1a1a2e;
             --primary-color: #00ffcc;
             --secondary-color: #2e2e4d;
+            --tertiary-color: #3a3a5a;
             --text-color: #e0e0e0;
             --text-muted-color: #a0a0c0;
+            --seen-color: #4dff88;
+            --error-color: #ff6b6b;
             --font-family: 'Poppins', sans-serif;
         }
 
@@ -28,7 +31,7 @@
             font-family: var(--font-family);
             background-color: var(--bg-color);
             color: var(--text-color);
-            overflow: hidden; /* Hide scrollbars */
+            overflow: hidden;
         }
 
         .hidden {
@@ -56,9 +59,10 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: clamp(2.5rem, 8vw, 4rem);
             font-weight: 700;
             margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
         }
 
         .hero span {
@@ -136,9 +140,10 @@
         }
 
         #auth-error {
-            color: #ff6b6b;
+            color: var(--error-color);
             margin-top: 1rem;
             min-height: 1.2em;
+            font-weight: 600;
         }
 
 
@@ -153,14 +158,15 @@
         #sidebar {
             width: 300px;
             background-color: var(--secondary-color);
-            border-right: 1px solid #3a3a5a;
+            border-right: 1px solid var(--tertiary-color);
             display: flex;
             flex-direction: column;
+            transition: width 0.3s ease;
         }
 
         .sidebar-header {
             padding: 1rem;
-            border-bottom: 1px solid #3a3a5a;
+            border-bottom: 1px solid var(--tertiary-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -194,13 +200,13 @@
             display: flex;
             align-items: center;
             padding: 1rem;
-            cursor: pointer;
+            cursor: default;
             transition: background-color 0.2s;
-            border-bottom: 1px solid #3a3a5a;
+            border-bottom: 1px solid var(--tertiary-color);
         }
 
         .user-list-item:hover {
-            background-color: #3a3a5a;
+            background-color: var(--tertiary-color);
         }
 
         .user-avatar {
@@ -210,12 +216,17 @@
             background-color: var(--primary-color);
             margin-right: 1rem;
             position: relative;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            font-weight: bold;
+            color: var(--bg-color);
         }
 
         .online-indicator {
             width: 12px;
             height: 12px;
-            background-color: #4caf50;
+            background-color: var(--seen-color);
             border-radius: 50%;
             border: 2px solid var(--secondary-color);
             position: absolute;
@@ -243,8 +254,9 @@
         .chat-header {
             padding: 1rem;
             background-color: var(--secondary-color);
-            border-bottom: 1px solid #3a3a5a;
+            border-bottom: 1px solid var(--tertiary-color);
             font-weight: 600;
+            text-align: center;
         }
 
         #messages-container {
@@ -261,6 +273,7 @@
             padding: 0.8rem 1.2rem;
             border-radius: 18px;
             position: relative;
+            word-wrap: break-word;
         }
 
         .message-bubble.sent {
@@ -278,7 +291,6 @@
         }
         
         .message-meta {
-            display: block;
             font-size: 0.75rem;
             margin-top: 0.5rem;
             text-align: right;
@@ -291,21 +303,23 @@
 
         .message-status-ticks {
             font-weight: bold;
+            line-height: 1;
         }
         .message-status-ticks.seen {
-            color: #4caf50; /* Green for seen */
+            color: var(--seen-color);
         }
-        .message-status-ticks.delivered {
-            color: inherit; /* White/default color */
-        }
-
+        
         .delete-icon {
             cursor: pointer;
-            display: none; /* Hidden by default */
             font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
         .message-bubble:hover .delete-icon {
-            display: inline; /* Show on hover for desktop */
+            opacity: 0.7;
+        }
+         .message-bubble:hover .delete-icon:hover {
+            opacity: 1;
         }
 
         #message-form-container {
@@ -318,6 +332,7 @@
             padding: 0 0.5rem;
             color: var(--text-muted-color);
             font-style: italic;
+            transition: opacity 0.3s;
         }
 
         #message-form {
@@ -329,7 +344,7 @@
             flex-grow: 1;
             padding: 0.8rem 1rem;
             border-radius: 20px;
-            border: 1px solid #3a3a5a;
+            border: 1px solid var(--tertiary-color);
             background: var(--bg-color);
             color: var(--text-color);
             font-size: 1rem;
@@ -349,13 +364,46 @@
             cursor: pointer;
         }
 
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--tertiary-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: absolute;
+                width: 80px;
+                z-index: 10;
+            }
+            #sidebar:hover {
+                width: 300px;
+            }
+            #main-chat-window {
+                width: 100%;
+            }
+            .user-info {
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            #sidebar:hover .user-info {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- =================================== -->
-    <!--          LANDING/LOGIN PAGE         -->
-    <!-- =================================== -->
     <div id="landing-page">
         <div id="three-js-canvas"></div>
 
@@ -365,17 +413,14 @@
         </div>
 
         <div class="auth-container" data-aos="fade-up" data-aos-delay="400">
-            <!-- Login Form -->
             <form id="login-form" class="auth-form">
                 <h2>Sign In</h2>
                 <input type="email" id="login-email" placeholder="Email" required>
                 <input type="password" id="login-password" placeholder="Password" required>
                 <button type="submit">Login</button>
-                <div id="auth-error"></div>
                 <p class="auth-toggle">Don't have an account? <a id="show-signup">Sign Up</a></p>
             </form>
 
-            <!-- Signup Form -->
             <form id="signup-form" class="auth-form hidden">
                 <h2>Create Account</h2>
                 <input type="text" id="signup-name" placeholder="Display Name" required>
@@ -384,30 +429,23 @@
                 <button type="submit">Sign Up</button>
                 <p class="auth-toggle">Already have an account? <a id="show-login">Sign In</a></p>
             </form>
+            <div id="auth-error"></div>
         </div>
     </div>
 
-
-    <!-- =================================== -->
-    <!--          MAIN CHAT APP              -->
-    <!-- =================================== -->
     <div id="chat-app" class="hidden">
         <aside id="sidebar">
             <div class="sidebar-header">
                 <h2>Users</h2>
                 <button id="sign-out-btn">Sign Out</button>
             </div>
-            <ul id="user-list">
-                <!-- User list items will be generated by JS -->
-            </ul>
+            <ul id="user-list"></ul>
         </aside>
         <main id="main-chat-window">
             <div class="chat-header">
                 <h3>Global Chat</h3>
             </div>
-            <div id="messages-container">
-                <!-- Messages will be injected here -->
-            </div>
+            <div id="messages-container"></div>
             <div id="message-form-container">
                 <div id="typing-indicator"></div>
                 <form id="message-form">
@@ -418,29 +456,22 @@
         </main>
     </div>
 
-
-    <!-- =================================== -->
-    <!--          SCRIPTS SECTION            -->
-    <!-- =================================== -->
-    
     <!-- Third-party Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-
-    <!-- Firebase SDK - using ES Modules -->
+    <!-- Firebase SDK (ES Module) -->
     <script type="module">
         // Import functions from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, push, onDisconnect, serverTimestamp, remove, onChildChanged, onChildRemoved } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, onDisconnect, serverTimestamp, remove, update } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
         // ----- 1. CONFIG & INITIALIZATION -----
-        // IMPORTANT: Replace with your project's Firebase configuration
+        // ❗️❗️❗️ IMPORTANT: Replace with your project's Firebase configuration ❗️❗️❗️
         const firebaseConfig = {
-            const firebaseConfig = {
             apiKey: "AIzaSyCPTlKkV5PK1XjwMtxuNrowmP4Qt3py0sE",
             authDomain: "login-8f29c.firebaseapp.com",
             databaseURL: "https://login-8f29c-default-rtdb.firebaseio.com",
@@ -458,17 +489,14 @@
         let currentUser = null;
         const CHAT_ID = "global_chat"; // Using one global chat room for simplicity
 
-        
         // ----- 2. DOM ELEMENT REFERENCES -----
         const landingPage = document.getElementById('landing-page');
         const chatApp = document.getElementById('chat-app');
-        
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
         const showSignupBtn = document.getElementById('show-signup');
         const showLoginBtn = document.getElementById('show-login');
         const authError = document.getElementById('auth-error');
-
         const signOutBtn = document.getElementById('sign-out-btn');
         const userList = document.getElementById('user-list');
         const messagesContainer = document.getElementById('messages-container');
@@ -476,9 +504,316 @@
         const messageInput = document.getElementById('message-input');
         const typingIndicator = document.getElementById('typing-indicator');
 
-        // ----- 3. LANDING PAGE ANIMATIONS -----
+        // ----- 3. UI/HELPER FUNCTIONS -----
+        function toggleAuthForms() {
+            loginForm.classList.toggle('hidden');
+            signupForm.classList.toggle('hidden');
+            authError.textContent = '';
+            gsap.from(loginForm.classList.contains('hidden') ? signupForm : loginForm, { opacity: 0, y: 20, duration: 0.5 });
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '';
+            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatLastActive(timestamp) {
+            if (!timestamp) return '...';
+            const now = new Date();
+            const lastActive = new Date(timestamp);
+            const diffMs = now - lastActive;
+            const diffMins = Math.round(diffMs / 60000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+            return lastActive.toLocaleDateString();
+        }
+
+        function renderUserList(users) {
+            userList.innerHTML = '';
+            const sortedUsers = Object.entries(users).sort(([, a], [, b]) => (b.isOnline ? 1 : -1) - (a.isOnline ? 1 : -1) || b.last_active - a.last_active);
+            
+            for (const [uid, user] of sortedUsers) {
+                const li = document.createElement('li');
+                li.className = 'user-list-item';
+                const displayName = user.displayName || 'Anonymous';
+                li.innerHTML = `
+                    <div class="user-avatar" title="${displayName}">
+                        ${displayName.charAt(0).toUpperCase()}
+                        ${user.isOnline ? '<div class="online-indicator"></div>' : ''}
+                    </div>
+                    <div class="user-info">
+                        <span class="username">${displayName}</span>
+                        <span class="last-active">${user.isOnline ? 'Online' : 'Active ' + formatLastActive(user.last_active)}</span>
+                    </div>
+                `;
+                userList.appendChild(li);
+            }
+        }
+        
+        function renderMessage(messageId, message) {
+            const isSent = message.senderId === currentUser.uid;
+            const bubble = document.createElement('div');
+            bubble.id = `msg-${messageId}`;
+            bubble.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
+            
+            const ticksHTML = isSent ? `<span class="message-status-ticks"></span>` : '';
+
+            bubble.innerHTML = `
+                <p class="message-text">${message.text}</p>
+                <span class="message-meta">
+                    <span class="message-time">${formatTimestamp(message.timestamp)}</span>
+                    ${ticksHTML}
+                    ${isSent ? `<span class="delete-icon" title="Hold to delete">🗑️</span>` : ''}
+                </span>
+            `;
+
+            messagesContainer.appendChild(bubble);
+            updateMessageStatusUI(messageId, message.status);
+
+            // Add delete functionality (long press for touch, click for mouse)
+            if (isSent) {
+                const deleteIcon = bubble.querySelector('.delete-icon');
+                let pressTimer;
+
+                const startPress = (e) => {
+                    e.preventDefault();
+                    pressTimer = setTimeout(() => {
+                        if (confirm('Are you sure you want to delete this message?')) {
+                            const messageRef = ref(db, `messages/${CHAT_ID}/${messageId}`);
+                            remove(messageRef);
+                        }
+                    }, 800); // 800ms hold
+                };
+
+                const cancelPress = () => clearTimeout(pressTimer);
+                
+                bubble.addEventListener('mousedown', startPress);
+                bubble.addEventListener('mouseup', cancelPress);
+                bubble.addEventListener('mouseleave', cancelPress);
+                bubble.addEventListener('touchstart', startPress, { passive: true });
+                bubble.addEventListener('touchend', cancelPress);
+            }
+        }
+        
+        function updateMessageStatusUI(messageId, status) {
+            const bubble = document.getElementById(`msg-${messageId}`);
+            if (!bubble) return;
+            const ticksElement = bubble.querySelector('.message-status-ticks');
+            if (!ticksElement) return;
+
+            ticksElement.classList.remove('seen');
+            switch (status) {
+                case 'sent':
+                    ticksElement.innerHTML = '✓';
+                    break;
+                case 'delivered':
+                    ticksElement.innerHTML = '✓✓';
+                    break;
+                case 'seen':
+                    ticksElement.innerHTML = '✓✓';
+                    ticksElement.classList.add('seen');
+                    break;
+                default:
+                    ticksElement.innerHTML = '';
+            }
+        }
+        
+        function removeMessageFromUI(messageId) {
+            const messageEl = document.getElementById(`msg-${messageId}`);
+            if(messageEl) {
+                gsap.to(messageEl, { 
+                    opacity: 0, 
+                    height: 0, 
+                    paddingTop: 0, 
+                    paddingBottom: 0,
+                    marginTop: 0, 
+                    marginBottom: 0,
+                    duration: 0.5, 
+                    onComplete: () => messageEl.remove() 
+                });
+            }
+        }
+
+        // ----- 4. CORE FIREBASE LOGIC -----
+        
+        // --- Authentication Listener (Main App Controller) ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                currentUser = user;
+                gsap.to(landingPage, { opacity: 0, duration: 0.5, onComplete: () => landingPage.classList.add('hidden') });
+                chatApp.classList.remove('hidden');
+                gsap.from(chatApp, { opacity: 0, duration: 0.5, delay: 0.5 });
+                initChat();
+            } else {
+                currentUser = null;
+                landingPage.classList.remove('hidden');
+                landingPage.style.opacity = 1;
+                chatApp.classList.add('hidden');
+                // Cleanup listeners if any
+            }
+        });
+
+        // --- Chat Initialization & Data Listeners ---
+        function initChat() {
+            messagesContainer.innerHTML = '';
+            setupPresence();
+            listenForUsers();
+            listenForMessages();
+            listenForTyping();
+        }
+
+        function setupPresence() {
+            const userStatusRef = ref(db, `users/${currentUser.uid}`);
+            const presenceRef = ref(db, '.info/connected');
+
+            onValue(presenceRef, (snap) => {
+                if (snap.val() === true) {
+                    const statusUpdate = {
+                        isOnline: true,
+                        last_active: serverTimestamp(),
+                        displayName: currentUser.displayName,
+                        email: currentUser.email
+                    };
+                    set(userStatusRef, statusUpdate);
+
+                    onDisconnect(userStatusRef).update({
+                        isOnline: false,
+                        last_active: serverTimestamp()
+                    });
+                }
+            });
+        }
+
+        function listenForUsers() {
+            const usersRef = ref(db, 'users');
+            onValue(usersRef, (snapshot) => {
+                const users = snapshot.val() || {};
+                renderUserList(users);
+            });
+        }
+
+        function listenForMessages() {
+            const messagesRef = ref(db, `messages/${CHAT_ID}`);
+            
+            onValue(messagesRef, (snapshot) => {
+                const allMessages = snapshot.val() || {};
+                const messagesToUpdate = {};
+                
+                messagesContainer.innerHTML = ''; // Simple re-render for this demo
+                const sortedMessages = Object.entries(allMessages).sort(([, a], [, b]) => a.timestamp - b.timestamp);
+
+                for (const [id, msg] of sortedMessages) {
+                    renderMessage(id, msg);
+                    // If message is not from me and is not 'seen' yet, mark it for update
+                    if (msg.senderId !== currentUser.uid && msg.status !== 'seen') {
+                        messagesToUpdate[`${id}/status`] = 'seen';
+                    }
+                }
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // Batch update all newly seen messages
+                if (Object.keys(messagesToUpdate).length > 0) {
+                    update(messagesRef, messagesToUpdate);
+                }
+            });
+        }
+        
+        function listenForTyping() {
+            const typingRef = ref(db, `typing/${CHAT_ID}`);
+            
+            onValue(typingRef, (snapshot) => {
+                const typingUsers = snapshot.val() || {};
+                delete typingUsers[currentUser.uid];
+                
+                const names = Object.values(typingUsers);
+                if (names.length === 0) {
+                    typingIndicator.textContent = '';
+                } else if (names.length === 1) {
+                    typingIndicator.textContent = `${names[0]} is typing...`;
+                } else {
+                    typingIndicator.textContent = `${names.slice(0, 2).join(', ')} and others are typing...`;
+                }
+            });
+
+            let typingTimeout;
+            messageInput.addEventListener('input', () => {
+                const myTypingRef = ref(db, `typing/${CHAT_ID}/${currentUser.uid}`);
+                set(myTypingRef, currentUser.displayName);
+
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    remove(myTypingRef);
+                }, 3000);
+            });
+        }
+
+        // ----- 5. EVENT LISTENERS -----
+
+        // --- Auth Forms ---
+        loginForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const email = loginForm['login-email'].value;
+            const password = loginForm['login-password'].value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(err => { authError.textContent = "Invalid email or password."; });
+        });
+
+        signupForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const name = signupForm['signup-name'].value;
+            const email = signupForm['signup-email'].value;
+            const password = signupForm['signup-password'].value;
+
+            if (name.length < 3) {
+                authError.textContent = 'Display name must be at least 3 characters.';
+                return;
+            }
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    return updateProfile(userCredential.user, { displayName: name });
+                })
+                .catch(err => { 
+                    if (err.code === 'auth/email-already-in-use') {
+                        authError.textContent = 'This email is already in use.';
+                    } else {
+                        authError.textContent = 'Password should be at least 6 characters.';
+                    }
+                });
+        });
+
+        // --- Message Form ---
+        messageForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            const messagesRef = ref(db, `messages/${CHAT_ID}`);
+            const newMessageRef = push(messagesRef);
+
+            set(newMessageRef, {
+                senderId: currentUser.uid,
+                text: text,
+                timestamp: serverTimestamp(),
+                status: 'sent'
+            });
+
+            messageInput.value = '';
+            
+            const myTypingRef = ref(db, `typing/${CHAT_ID}/${currentUser.uid}`);
+            remove(myTypingRef);
+        });
+
+        // --- General Listeners ---
+        showSignupBtn.addEventListener('click', toggleAuthForms);
+        showLoginBtn.addEventListener('click', toggleAuthForms);
+        signOutBtn.addEventListener('click', () => signOut(auth));
+        
+        // ----- 6. LANDING PAGE ANIMATIONS & APP START -----
         function initLandingPageAnimations() {
-            AOS.init();
+            AOS.init({ once: true });
 
             new Typed('#typed-element', {
                 strings: ['Sintha Chat.', 'Real-time.', 'Secure.', 'Beautiful.'],
@@ -489,7 +824,7 @@
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('three-js-canvas').appendChild(renderer.domElement);
 
@@ -520,305 +855,7 @@
             });
         }
         
-        // ----- 4. UI MANIPULATION & HELPERS -----
-        function toggleAuthForms() {
-            loginForm.classList.toggle('hidden');
-            signupForm.classList.toggle('hidden');
-            authError.textContent = '';
-        }
-
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return '';
-            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function formatLastActive(timestamp) {
-            if (!timestamp) return '...';
-            const now = new Date();
-            const lastActive = new Date(timestamp);
-            const diffMs = now - lastActive;
-            const diffMins = Math.round(diffMs / 60000);
-
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-            return lastActive.toLocaleDateString();
-        }
-
-        function renderUserList(users) {
-            userList.innerHTML = '';
-            const sortedUsers = Object.entries(users).sort((a,b) => b[1].isOnline - a[1].isOnline);
-            
-            for (const [uid, user] of sortedUsers) {
-                const li = document.createElement('li');
-                li.className = 'user-list-item';
-                li.innerHTML = `
-                    <div class="user-avatar">
-                        ${user.isOnline ? '<div class="online-indicator"></div>' : ''}
-                    </div>
-                    <div class="user-info">
-                        <span class="username">${user.displayName || 'Anonymous'}</span>
-                        <span class="last-active">${user.isOnline ? 'Online' : 'Active ' + formatLastActive(user.last_active)}</span>
-                    </div>
-                `;
-                userList.appendChild(li);
-            }
-        }
-        
-        function renderMessage(messageId, message) {
-            const isSent = message.senderId === currentUser.uid;
-            const bubble = document.createElement('div');
-            bubble.id = messageId;
-            bubble.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
-
-            const ticksId = `ticks-${messageId}`;
-            bubble.innerHTML = `
-                <p class="message-text">${message.text}</p>
-                <span class="message-meta">
-                    <span class="message-time">${formatTimestamp(message.timestamp)}</span>
-                    ${isSent ? `<span id="${ticksId}" class="message-status-ticks"></span>` : ''}
-                    <span class="delete-icon" title="Delete Message">🗑️</span>
-                </span>
-            `;
-
-            messagesContainer.appendChild(bubble);
-
-            // Add delete functionality
-            const deleteIcon = bubble.querySelector('.delete-icon');
-            let pressTimer;
-            const startPress = () => {
-                pressTimer = setTimeout(() => {
-                   if (isSent && confirm('Are you sure you want to delete this message?')) {
-                        const messageRef = ref(db, `messages/${CHAT_ID}/${messageId}`);
-                        remove(messageRef);
-                   }
-                }, 800); // 800ms hold
-            };
-            const cancelPress = () => clearTimeout(pressTimer);
-            
-            // For both mouse and touch
-            bubble.addEventListener('mousedown', startPress);
-            bubble.addEventListener('mouseup', cancelPress);
-            bubble.addEventListener('mouseleave', cancelPress);
-            bubble.addEventListener('touchstart', startPress);
-            bubble.addEventListener('touchend', cancelPress);
-            
-            // Non-hold click for desktop
-            deleteIcon.addEventListener('click', (e) => {
-                e.stopPropagation(); // prevent triggering the hold listener
-                if (isSent && confirm('Are you sure you want to delete this message?')) {
-                    const messageRef = ref(db, `messages/${CHAT_ID}/${messageId}`);
-                    remove(messageRef);
-                }
-            });
-
-            updateMessageStatusUI(messageId, message.status);
-            gsap.from(bubble, { opacity: 0, y: 20, duration: 0.5 });
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        
-        function updateMessageStatusUI(messageId, status) {
-            const ticksElement = document.getElementById(`ticks-${messageId}`);
-            if (!ticksElement) return;
-
-            ticksElement.classList.remove('seen', 'delivered');
-            switch (status) {
-                case 'sent':
-                    ticksElement.innerHTML = '✓';
-                    break;
-                case 'delivered':
-                    ticksElement.innerHTML = '✓✓';
-                    ticksElement.classList.add('delivered');
-                    break;
-                case 'seen':
-                    ticksElement.innerHTML = '✓✓';
-                    ticksElement.classList.add('seen');
-                    break;
-            }
-        }
-        
-        function removeMessageFromUI(messageId) {
-            const messageEl = document.getElementById(messageId);
-            if(messageEl) {
-                gsap.to(messageEl, { opacity: 0, x: 50, duration: 0.5, onComplete: () => messageEl.remove() });
-            }
-        }
-
-        // ----- 5. FIREBASE LOGIC -----
-        
-        // --- Authentication ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                currentUser = user;
-                landingPage.classList.add('hidden');
-                chatApp.classList.remove('hidden');
-                initChat();
-            } else {
-                currentUser = null;
-                landingPage.classList.remove('hidden');
-                chatApp.classList.add('hidden');
-            }
-        });
-
-        loginForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const email = loginForm['login-email'].value;
-            const password = loginForm['login-password'].value;
-            signInWithEmailAndPassword(auth, email, password)
-                .catch(err => { authError.textContent = err.message; });
-        });
-
-        signupForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const name = signupForm['signup-name'].value;
-            const email = signupForm['signup-email'].value;
-            const password = signupForm['signup-password'].value;
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(userCredential => {
-                    const user = userCredential.user;
-                    // Update profile and create user entry in DB
-                    return updateProfile(user, { displayName: name })
-                        .then(() => {
-                            const userRef = ref(db, 'users/' + user.uid);
-                            set(userRef, {
-                                displayName: name,
-                                email: user.email,
-                            });
-                        });
-                })
-                .catch(err => { authError.textContent = err.message; });
-        });
-
-        signOutBtn.addEventListener('click', () => signOut(auth));
-
-
-        // --- Chat Initialization & Core Logic ---
-        function initChat() {
-            messagesContainer.innerHTML = '';
-            setupPresence();
-            listenForUsers();
-            listenForMessages();
-            listenForTyping();
-            
-            // Auto-mark messages as 'seen'
-            const messagesRef = ref(db, `messages/${CHAT_ID}`);
-            onValue(messagesRef, (snapshot) => {
-                snapshot.forEach(childSnapshot => {
-                    const msg = childSnapshot.val();
-                    if(msg.senderId !== currentUser.uid && msg.status !== 'seen') {
-                        const msgRef = ref(db, `messages/${CHAT_ID}/${childSnapshot.key}`);
-                        set({ ...msg, status: 'seen' });
-                    }
-                });
-            }, { onlyOnce: false });
-        }
-
-        function setupPresence() {
-            const userStatusRef = ref(db, `users/${currentUser.uid}`);
-            const presenceRef = ref(db, '.info/connected');
-
-            onValue(presenceRef, (snap) => {
-                if (snap.val() === true) {
-                    const con = onDisconnect(userStatusRef);
-                    con.update({
-                        isOnline: false,
-                        last_active: serverTimestamp()
-                    });
-                    
-                    set(userStatusRef, {
-                        displayName: currentUser.displayName,
-                        email: currentUser.email,
-                        isOnline: true,
-                        last_active: serverTimestamp()
-                    });
-                }
-            });
-        }
-
-        function listenForUsers() {
-            const usersRef = ref(db, 'users');
-            onValue(usersRef, (snapshot) => {
-                const users = snapshot.val() || {};
-                renderUserList(users);
-            });
-        }
-
-        function listenForMessages() {
-            const messagesRef = ref(db, `messages/${CHAT_ID}`);
-            
-            onValue(messagesRef, (snapshot) => {
-                messagesContainer.innerHTML = ''; // Full re-render on any change
-                if(snapshot.exists()) {
-                    snapshot.forEach(childSnapshot => {
-                        renderMessage(childSnapshot.key, childSnapshot.val());
-                    });
-                }
-            });
-        }
-        
-        function listenForTyping() {
-            const typingRef = ref(db, `typing/${CHAT_ID}`);
-            
-            // Listen for others typing
-            onValue(typingRef, (snapshot) => {
-                const typingUsers = snapshot.val() || {};
-                delete typingUsers[currentUser.uid]; // Don't show myself
-                
-                const names = Object.values(typingUsers);
-                if(names.length === 0) {
-                    typingIndicator.textContent = '';
-                } else if (names.length === 1) {
-                    typingIndicator.textContent = `${names[0]} is typing...`;
-                } else {
-                    typingIndicator.textContent = `${names.join(', ')} are typing...`;
-                }
-            });
-
-            // Set my typing status
-            let typingTimeout;
-            messageInput.addEventListener('input', () => {
-                const myTypingRef = ref(db, `typing/${CHAT_ID}/${currentUser.uid}`);
-                set(myTypingRef, currentUser.displayName);
-
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => {
-                    remove(myTypingRef);
-                }, 3000); // Remove after 3s of inactivity
-            });
-        }
-
-        messageForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const text = messageInput.value.trim();
-            if (!text) return;
-            
-            const messagesRef = ref(db, `messages/${CHAT_ID}`);
-            const newMessageRef = push(messagesRef);
-
-            set(newMessageRef, {
-                senderId: currentUser.uid,
-                senderName: currentUser.displayName,
-                text: text,
-                timestamp: serverTimestamp(),
-                status: 'sent' // Sent -> Delivered -> Seen
-            });
-
-            messageInput.value = '';
-            
-            // Clear my typing indicator immediately after sending
-            const myTypingRef = ref(db, `typing/${CHAT_ID}/${currentUser.uid}`);
-            remove(myTypingRef);
-        });
-
-        
-        // ----- 6. APP START & EVENT LISTENERS -----
-        document.addEventListener('DOMContentLoaded', () => {
-            initLandingPageAnimations();
-            
-            showSignupBtn.addEventListener('click', toggleAuthForms);
-            showLoginBtn.addEventListener('click', toggleAuthForms);
-        });
+        document.addEventListener('DOMContentLoaded', initLandingPageAnimations);
 
     </script>
 </body>
