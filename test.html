@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sintha Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
         /* --- 1. General & Theming --- */
@@ -19,12 +18,17 @@
             --seen-color: #4dff88;
             --error-color: #ff6b6b;
             --font-family: 'Poppins', sans-serif;
+            --font-size-base: 16px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            font-size: var(--font-size-base);
         }
 
         body {
@@ -37,368 +41,232 @@
         .hidden {
             display: none !important;
         }
-
-        /* --- 2. Landing Page & Login --- */
-        #three-js-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
+        
+        .visually-hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
+        /* --- 2. Landing & Auth Page --- */
         #landing-page {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100vh; text-align: center; padding: 2rem;
+            position: relative; z-index: 1;
         }
-
-        .hero h1 {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        #three-js-canvas {
+            position: fixed; top: 0; left: 0; z-index: -1;
         }
-
-        .hero span {
-            color: var(--primary-color);
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--text-muted-color);
-            max-width: 500px;
-            margin-bottom: 2rem;
-        }
-
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; text-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
+        .hero span { color: var(--primary-color); }
+        .hero p { font-size: clamp(1rem, 4vw, 1.2rem); color: var(--text-muted-color); max-width: 500px; margin-bottom: 2rem; }
         .auth-container {
-            background: rgba(46, 46, 77, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 1px solid var(--secondary-color);
-            width: 100%;
-            max-width: 400px;
+            background: rgba(46, 46, 77, 0.7); backdrop-filter: blur(10px);
+            padding: 2rem; border-radius: 15px; border: 1px solid var(--secondary-color);
+            width: 100%; max-width: 400px;
         }
-
-        .auth-container h2 {
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-        }
-
+        .auth-container h2 { margin-bottom: 1.5rem; color: var(--primary-color); }
         .auth-form input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--secondary-color);
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 8px;
+            border: 1px solid var(--secondary-color); background: var(--bg-color);
+            color: var(--text-color); font-size: 1rem; transition: all 0.3s;
         }
-
         .auth-form input:focus {
-            outline: none;
-            border-color: var(--primary-color);
+            outline: none; border-color: var(--primary-color);
             box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
         }
-
         .auth-form button {
-            width: 100%;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            background: var(--primary-color);
-            color: var(--bg-color);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            width: 100%; padding: 0.8rem; border: none; border-radius: 8px;
+            background: var(--primary-color); color: var(--bg-color);
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;
         }
-
-        .auth-form button:hover {
-            background-color: #00e6b8;
-            transform: translateY(-2px);
-        }
-        
-        .auth-toggle {
-            margin-top: 1rem;
-            color: var(--text-muted-color);
-        }
-
-        .auth-toggle a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        #auth-error {
-            color: var(--error-color);
-            margin-top: 1rem;
-            min-height: 1.2em;
-            font-weight: 600;
-        }
-
+        .auth-form button:hover { background-color: #00e6b8; transform: translateY(-2px); }
+        .auth-toggle { margin-top: 1rem; color: var(--text-muted-color); }
+        .auth-toggle a { color: var(--primary-color); text-decoration: none; font-weight: 600; cursor: pointer; }
+        #auth-error { color: var(--error-color); margin-top: 1rem; min-height: 1.2em; font-weight: 600; }
 
         /* --- 3. Chat Application UI --- */
-        #chat-app {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-        }
+        #chat-app { display: flex; height: 100vh; width: 100vw; }
 
         /* Sidebar */
         #sidebar {
-            width: 300px;
-            background-color: var(--secondary-color);
+            width: 320px; background-color: var(--secondary-color);
             border-right: 1px solid var(--tertiary-color);
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s ease;
+            display: flex; flex-direction: column; transition: width 0.3s ease;
         }
-
         .sidebar-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--tertiary-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 1rem; border-bottom: 1px solid var(--tertiary-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .sidebar-header h2 {
-            color: var(--primary-color);
+        .sidebar-header h2 { font-size: 1.2rem; color: var(--primary-color); }
+        .new-chat-btn {
+            background: var(--primary-color); color: var(--bg-color); border: none;
+            padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;
+            font-weight: 600; transition: background-color 0.3s;
+            display: flex; align-items: center; gap: 0.5rem;
         }
+        .new-chat-btn:hover { background-color: #00e6b8; }
         
-        #sign-out-btn {
-            background: none;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 0.4rem 0.8rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        #sign-out-btn:hover {
-            background-color: var(--primary-color);
-            color: var(--bg-color);
-        }
-
-        #user-list {
-            list-style-type: none;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-        
-        .user-list-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            cursor: default;
-            transition: background-color 0.2s;
+        #conversation-list { list-style-type: none; overflow-y: auto; flex-grow: 1; }
+        .conversation-item {
+            display: flex; align-items: center; padding: 1rem;
+            cursor: pointer; transition: background-color 0.2s;
             border-bottom: 1px solid var(--tertiary-color);
         }
+        .conversation-item.active, .conversation-item:hover { background-color: var(--tertiary-color); }
 
-        .user-list-item:hover {
-            background-color: var(--tertiary-color);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            margin-right: 1rem;
-            position: relative;
-            flex-shrink: 0;
-            display: grid;
-            place-items: center;
-            font-weight: bold;
+        .avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            background-color: var(--primary-color); margin-right: 1rem;
+            position: relative; flex-shrink: 0;
+            display: grid; place-items: center; font-weight: bold; font-size: 1.2rem;
             color: var(--bg-color);
         }
-
         .online-indicator {
-            width: 12px;
-            height: 12px;
-            background-color: var(--seen-color);
-            border-radius: 50%;
-            border: 2px solid var(--secondary-color);
-            position: absolute;
-            bottom: 0;
-            right: 0;
+            width: 12px; height: 12px; background-color: var(--seen-color);
+            border-radius: 50%; border: 2px solid var(--secondary-color);
+            position: absolute; bottom: 0; right: 0;
         }
-
-        .user-info .username {
-            font-weight: 600;
+        .conversation-details {
+            overflow: hidden;
         }
-        .user-info .last-active {
-            font-size: 0.8rem;
-            color: var(--text-muted-color);
-            display: block;
+        .conversation-details .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .conversation-details .last-message {
+            font-size: 0.85rem; color: var(--text-muted-color);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
         }
-
+        
+        .profile-section {
+            padding: 1rem; border-top: 1px solid var(--tertiary-color);
+            display: flex; align-items: center; background-color: #1e1e3b;
+        }
+        #current-user-name { flex-grow: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #edit-name-btn {
+            background: none; border: none; color: var(--text-muted-color);
+            cursor: pointer; font-size: 1.2rem; margin-left: 0.5rem;
+        }
+        #sign-out-btn {
+            background: none; border: none; color: var(--text-muted-color);
+            cursor: pointer; font-size: 1.2rem; margin-left: 0.5rem;
+        }
+        #edit-name-btn:hover, #sign-out-btn:hover { color: var(--primary-color); }
+        
         /* Main Chat Window */
         #main-chat-window {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-color);
+            flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-color);
         }
-
         .chat-header {
-            padding: 1rem;
-            background-color: var(--secondary-color);
-            border-bottom: 1px solid var(--tertiary-color);
-            font-weight: 600;
-            text-align: center;
+            padding: 1rem; background-color: var(--secondary-color);
+            border-bottom: 1px solid var(--tertiary-color); font-weight: 600; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
         }
-
+        #chat-header-title { font-size: 1.1rem; }
+        
+        #welcome-screen {
+            flex-grow: 1; display: grid; place-items: center; text-align: center;
+            color: var(--text-muted-color); padding: 2rem;
+        }
+        #welcome-screen h2 { margin-bottom: 0.5rem; }
+        #welcome-screen p { font-size: 1.2rem; }
+        
         #messages-container {
-            flex-grow: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            flex-grow: 1; padding: 1.5rem; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 1rem;
         }
-
         .message-bubble {
-            max-width: 70%;
-            padding: 0.8rem 1.2rem;
-            border-radius: 18px;
-            position: relative;
-            word-wrap: break-word;
+            max-width: 70%; padding: 0.7rem 1.1rem; border-radius: 18px;
+            position: relative; word-wrap: break-word; font-size: 0.95rem;
         }
-
         .message-bubble.sent {
-            background-color: var(--primary-color);
-            color: var(--bg-color);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
+            background-color: var(--primary-color); color: var(--bg-color);
+            align-self: flex-end; border-bottom-right-radius: 4px;
         }
-        
         .message-bubble.received {
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
+            background-color: var(--secondary-color); color: var(--text-color);
+            align-self: flex-start; border-bottom-left-radius: 4px;
         }
-        
+        .sender-name { font-size: 0.75rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.25rem; }
         .message-meta {
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
-            text-align: right;
-            opacity: 0.7;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0.5rem;
+            font-size: 0.7rem; margin-top: 0.5rem; text-align: right; opacity: 0.7;
+            display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;
         }
-
-        .message-status-ticks {
-            font-weight: bold;
-            line-height: 1;
-        }
-        .message-status-ticks.seen {
-            color: var(--seen-color);
-        }
+        .message-status-ticks { font-weight: bold; line-height: 1; }
+        .message-status-ticks.seen { color: var(--seen-color); }
         
-        .delete-icon {
-            cursor: pointer;
-            font-size: 1rem;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .message-bubble:hover .delete-icon {
-            opacity: 0.7;
-        }
-         .message-bubble:hover .delete-icon:hover {
-            opacity: 1;
-        }
-
-        #message-form-container {
-            padding: 1rem;
-            background-color: var(--secondary-color);
-        }
-
-        #typing-indicator {
-            height: 20px;
-            padding: 0 0.5rem;
-            color: var(--text-muted-color);
-            font-style: italic;
-            transition: opacity 0.3s;
-        }
-
-        #message-form {
-            display: flex;
-            gap: 1rem;
-        }
-
+        #message-form-container { padding: 1rem; background-color: var(--secondary-color); }
+        #typing-indicator { height: 20px; font-size: 0.8rem; padding: 0 0.5rem; color: var(--text-muted-color); font-style: italic; }
+        #message-form { display: flex; gap: 1rem; }
         #message-input {
-            flex-grow: 1;
-            padding: 0.8rem 1rem;
-            border-radius: 20px;
-            border: 1px solid var(--tertiary-color);
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-size: 1rem;
+            flex-grow: 1; padding: 0.8rem 1rem; border-radius: 20px;
+            border: 1px solid var(--tertiary-color); background: var(--bg-color);
+            color: var(--text-color); font-size: 1rem;
         }
-        #message-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
+        #message-input:focus { outline: none; border-color: var(--primary-color); }
         #message-form button {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 20px;
-            background: var(--primary-color);
-            color: var(--bg-color);
-            font-weight: 600;
-            cursor: pointer;
+            padding: 0.8rem 1.5rem; border: none; border-radius: 20px;
+            background: var(--primary-color); color: var(--bg-color);
+            font-weight: 600; cursor: pointer;
         }
 
+        /* Modal for New Group */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            display: grid; place-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: var(--secondary-color); padding: 2rem; border-radius: 15px;
+            width: 90%; max-width: 500px;
+        }
+        .modal-content h3 { color: var(--primary-color); margin-bottom: 1.5rem; }
+        #new-group-form input[type="text"] {
+            width: 100%; padding: 0.8rem 1rem; margin-bottom: 1rem; border-radius: 8px;
+            border: 1px solid var(--tertiary-color); background: var(--bg-color);
+            color: var(--text-color); font-size: 1rem;
+        }
+        .modal-user-list { max-height: 200px; overflow-y: auto; margin-bottom: 1.5rem; }
+        .modal-user-item {
+            display: flex; align-items: center; padding: 0.8rem;
+            border-bottom: 1px solid var(--tertiary-color); cursor: pointer;
+        }
+        .modal-user-item input[type="checkbox"] { margin-right: 1rem; width: 20px; height: 20px; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 1rem; }
+        .modal-buttons button { padding: 0.6rem 1.2rem; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        #create-group-submit { background: var(--primary-color); color: var(--bg-color); border: none; }
+        #create-group-cancel { background: var(--tertiary-color); color: var(--text-color); border: none; }
+        
         /* Scrollbar styles */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--secondary-color);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--tertiary-color);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--secondary-color); }
+        ::-webkit-scrollbar-thumb { background: var(--tertiary-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
 
-        /* Mobile Responsiveness */
+        /* --- Mobile Responsiveness --- */
         @media (max-width: 768px) {
+            html { font-size: 14px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            
             #sidebar {
-                position: absolute;
-                width: 80px;
-                z-index: 10;
+                position: absolute; width: 70px; z-index: 10;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.2);
             }
-            #sidebar:hover {
-                width: 300px;
+            #sidebar:hover { width: 280px; }
+            
+            .conversation-details, .profile-section > span {
+                opacity: 0; transition: opacity 0.2s 0.1s;
+                pointer-events: none;
             }
-            #main-chat-window {
-                width: 100%;
-            }
-            .user-info {
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
-            #sidebar:hover .user-info {
+            #sidebar:hover .conversation-details,
+            #sidebar:hover .profile-section > span {
                 opacity: 1;
+                pointer-events: all;
             }
+
+            .sidebar-header h2, .new-chat-btn span { display: none; }
+            #sidebar:hover .sidebar-header h2, #sidebar:hover .new-chat-btn span { display: inline; }
+            
+            #main-chat-window { width: 100%; }
+            .message-bubble { max-width: 85%; }
         }
     </style>
 </head>
@@ -406,13 +274,11 @@
 
     <div id="landing-page">
         <div id="three-js-canvas"></div>
-
-        <div class="hero" data-aos="fade-in" data-aos-delay="200">
-            <h1>Welcome to <span id="typed-element"></span></h1>
-            <p>Real-time, secure, and beautifully designed communication for the modern web.</p>
+        <div class="hero">
+            <h1>Welcome to <span>Sintha Chat</span></h1>
+            <p>Direct, secure, and beautiful conversations.</p>
         </div>
-
-        <div class="auth-container" data-aos="fade-up" data-aos-delay="400">
+        <div class="auth-container">
             <form id="login-form" class="auth-form">
                 <h2>Sign In</h2>
                 <input type="email" id="login-email" placeholder="Email" required>
@@ -420,7 +286,6 @@
                 <button type="submit">Login</button>
                 <p class="auth-toggle">Don't have an account? <a id="show-signup">Sign Up</a></p>
             </form>
-
             <form id="signup-form" class="auth-form hidden">
                 <h2>Create Account</h2>
                 <input type="text" id="signup-name" placeholder="Display Name" required>
@@ -436,38 +301,63 @@
     <div id="chat-app" class="hidden">
         <aside id="sidebar">
             <div class="sidebar-header">
-                <h2>Users</h2>
-                <button id="sign-out-btn">Sign Out</button>
+                <h2>Chats</h2>
+                <button id="new-chat-btn" class="new-chat-btn" title="New Chat">➕ <span>New</span></button>
             </div>
-            <ul id="user-list"></ul>
+            <ul id="conversation-list"></ul>
+            <div class="profile-section">
+                <span id="current-user-name"></span>
+                <button id="edit-name-btn" title="Edit your name">✏️</button>
+                <button id="sign-out-btn" title="Sign Out">🚪</button>
+            </div>
         </aside>
+        
         <main id="main-chat-window">
-            <div class="chat-header">
-                <h3>Global Chat</h3>
+            <div id="chat-view" class="hidden">
+                <div class="chat-header">
+                    <span id="chat-header-title"></span>
+                </div>
+                <div id="messages-container"></div>
+                <div id="message-form-container">
+                    <div id="typing-indicator"></div>
+                    <form id="message-form">
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required>
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
             </div>
-            <div id="messages-container"></div>
-            <div id="message-form-container">
-                <div id="typing-indicator"></div>
-                <form id="message-form">
-                    <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required>
-                    <button type="submit">Send</button>
-                </form>
+            <div id="welcome-screen">
+                <div>
+                    <h2>Welcome to Sintha Chat</h2>
+                    <p>Select a conversation or start a new one.</p>
+                </div>
             </div>
         </main>
     </div>
-
-    <!-- Third-party Libraries -->
+    
+    <div id="new-group-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Create a New Chat</h3>
+            <form id="new-group-form">
+                <p>Select one user for a direct message, or multiple for a group chat.</p>
+                <br>
+                <input type="text" id="group-name-input" placeholder="Enter group name (if more than one selected)">
+                <div class="modal-user-list"></div>
+                <div class="modal-buttons">
+                    <button type="button" id="create-group-cancel">Cancel</button>
+                    <button type="submit" id="create-group-submit">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-    <!-- Firebase SDK (ES Module) -->
+    
     <script type="module">
-        // Import functions from the Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, push, onDisconnect, serverTimestamp, remove, update } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, onDisconnect, serverTimestamp, update, off, get, child, remove } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
         // ----- 1. CONFIG & INITIALIZATION -----
         // ❗️❗️❗️ IMPORTANT: Replace with your project's Firebase configuration ❗️❗️❗️
@@ -486,8 +376,13 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // Global State & Listeners
         let currentUser = null;
-        const CHAT_ID = "global_chat"; // Using one global chat room for simplicity
+        let currentChatId = null;
+        let conversationsListener = null;
+        let messageListener = null;
+        let typingListener = null;
+        let allUsersCache = {};
 
         // ----- 2. DOM ELEMENT REFERENCES -----
         const landingPage = document.getElementById('landing-page');
@@ -497,344 +392,365 @@
         const showSignupBtn = document.getElementById('show-signup');
         const showLoginBtn = document.getElementById('show-login');
         const authError = document.getElementById('auth-error');
+        const conversationList = document.getElementById('conversation-list');
+        const currentUserNameEl = document.getElementById('current-user-name');
+        const editNameBtn = document.getElementById('edit-name-btn');
         const signOutBtn = document.getElementById('sign-out-btn');
-        const userList = document.getElementById('user-list');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatView = document.getElementById('chat-view');
+        const chatHeaderTitle = document.getElementById('chat-header-title');
         const messagesContainer = document.getElementById('messages-container');
         const messageForm = document.getElementById('message-form');
         const messageInput = document.getElementById('message-input');
         const typingIndicator = document.getElementById('typing-indicator');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const newGroupModal = document.getElementById('new-group-modal');
+        const newGroupForm = document.getElementById('new-group-form');
+        const createGroupCancelBtn = document.getElementById('create-group-cancel');
+        const threeJsCanvas = document.getElementById('three-js-canvas');
 
         // ----- 3. UI/HELPER FUNCTIONS -----
-        function toggleAuthForms() {
-            loginForm.classList.toggle('hidden');
-            signupForm.classList.toggle('hidden');
-            authError.textContent = '';
-            gsap.from(loginForm.classList.contains('hidden') ? signupForm : loginForm, { opacity: 0, y: 20, duration: 0.5 });
-        }
-
         function formatTimestamp(timestamp) {
             if (!timestamp) return '';
             return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        function formatLastActive(timestamp) {
-            if (!timestamp) return '...';
-            const now = new Date();
-            const lastActive = new Date(timestamp);
-            const diffMs = now - lastActive;
-            const diffMins = Math.round(diffMs / 60000);
+        function renderConversations(chatsData) {
+            conversationList.innerHTML = '';
+            if (chatsData.length === 0) {
+                conversationList.innerHTML = '<li style="padding: 1rem; color: var(--text-muted-color);">No chats yet.</li>';
+                return;
+            }
 
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-            return lastActive.toLocaleDateString();
-        }
+            chatsData.sort((a, b) => (b.lastMessage?.timestamp || 0) - (a.lastMessage?.timestamp || 0));
 
-        function renderUserList(users) {
-            userList.innerHTML = '';
-            const sortedUsers = Object.entries(users).sort(([, a], [, b]) => (b.isOnline ? 1 : -1) - (a.isOnline ? 1 : -1) || b.last_active - a.last_active);
-            
-            for (const [uid, user] of sortedUsers) {
+            chatsData.forEach(chat => {
                 const li = document.createElement('li');
-                li.className = 'user-list-item';
-                const displayName = user.displayName || 'Anonymous';
+                li.className = 'conversation-item';
+                li.dataset.chatId = chat.id;
+                if (chat.id === currentChatId) li.classList.add('active');
+                
+                let avatarInitial = '?';
+                let chatName = 'Unknown Chat';
+                let isOnline = false;
+
+                if (chat.isGroup) {
+                    avatarInitial = (chat.groupName || 'G').charAt(0).toUpperCase();
+                    chatName = chat.groupName || 'Group Chat';
+                } else {
+                    const otherUserId = Object.keys(chat.members).find(id => id !== currentUser.uid);
+                    const otherUser = allUsersCache[otherUserId];
+                    if (otherUser) {
+                        chatName = otherUser.displayName;
+                        avatarInitial = chatName.charAt(0).toUpperCase();
+                        isOnline = otherUser.isOnline;
+                    }
+                }
+                
+                const lastMessage = chat.lastMessage;
+                const lastMessageText = lastMessage?.text 
+                    ? (lastMessage.senderId === currentUser.uid ? "You: " : "") + lastMessage.text 
+                    : "No messages yet";
+
                 li.innerHTML = `
-                    <div class="user-avatar" title="${displayName}">
-                        ${displayName.charAt(0).toUpperCase()}
-                        ${user.isOnline ? '<div class="online-indicator"></div>' : ''}
+                    <div class="avatar" title="${chatName}">
+                        ${avatarInitial}
+                        ${!chat.isGroup && isOnline ? '<div class="online-indicator"></div>' : ''}
                     </div>
-                    <div class="user-info">
-                        <span class="username">${displayName}</span>
-                        <span class="last-active">${user.isOnline ? 'Online' : 'Active ' + formatLastActive(user.last_active)}</span>
+                    <div class="conversation-details">
+                        <div class="name">${chatName}</div>
+                        <div class="last-message">${lastMessageText}</div>
                     </div>
                 `;
-                userList.appendChild(li);
-            }
+                li.addEventListener('click', () => selectChat(chat.id));
+                conversationList.appendChild(li);
+            });
         }
         
-        function renderMessage(messageId, message) {
-            const isSent = message.senderId === currentUser.uid;
-            const bubble = document.createElement('div');
-            bubble.id = `msg-${messageId}`;
-            bubble.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
+        async function selectChat(chatId) {
+            if (currentChatId === chatId) return;
+            currentChatId = chatId;
             
-            const ticksHTML = isSent ? `<span class="message-status-ticks"></span>` : '';
+            document.querySelectorAll('.conversation-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.conversation-item[data-chat-id="${chatId}"]`)?.classList.add('active');
+            
+            welcomeScreen.classList.add('hidden');
+            chatView.classList.remove('hidden');
+            gsap.from(chatView, { opacity: 0, duration: 0.3 });
+            
+            const chatSnapshot = await get(ref(db, `chats/${chatId}`));
+            const chatData = chatSnapshot.val();
+            if (!chatData) return;
 
-            bubble.innerHTML = `
-                <p class="message-text">${message.text}</p>
-                <span class="message-meta">
-                    <span class="message-time">${formatTimestamp(message.timestamp)}</span>
-                    ${ticksHTML}
-                    ${isSent ? `<span class="delete-icon" title="Hold to delete">🗑️</span>` : ''}
-                </span>
-            `;
-
-            messagesContainer.appendChild(bubble);
-            updateMessageStatusUI(messageId, message.status);
-
-            // Add delete functionality (long press for touch, click for mouse)
-            if (isSent) {
-                const deleteIcon = bubble.querySelector('.delete-icon');
-                let pressTimer;
-
-                const startPress = (e) => {
-                    e.preventDefault();
-                    pressTimer = setTimeout(() => {
-                        if (confirm('Are you sure you want to delete this message?')) {
-                            const messageRef = ref(db, `messages/${CHAT_ID}/${messageId}`);
-                            remove(messageRef);
-                        }
-                    }, 800); // 800ms hold
-                };
-
-                const cancelPress = () => clearTimeout(pressTimer);
-                
-                bubble.addEventListener('mousedown', startPress);
-                bubble.addEventListener('mouseup', cancelPress);
-                bubble.addEventListener('mouseleave', cancelPress);
-                bubble.addEventListener('touchstart', startPress, { passive: true });
-                bubble.addEventListener('touchend', cancelPress);
+            if (chatData.isGroup) {
+                chatHeaderTitle.textContent = chatData.groupName;
+            } else {
+                const otherUserId = Object.keys(chatData.members).find(id => id !== currentUser.uid);
+                const userSnapshot = await get(ref(db, `users/${otherUserId}`));
+                chatHeaderTitle.textContent = userSnapshot.val().displayName;
             }
+
+            listenForMessages(chatId, chatData.isGroup);
+            listenForTyping(chatId);
+            messageInput.focus();
         }
-        
-        function updateMessageStatusUI(messageId, status) {
-            const bubble = document.getElementById(`msg-${messageId}`);
-            if (!bubble) return;
-            const ticksElement = bubble.querySelector('.message-status-ticks');
-            if (!ticksElement) return;
 
-            ticksElement.classList.remove('seen');
-            switch (status) {
-                case 'sent':
-                    ticksElement.innerHTML = '✓';
-                    break;
-                case 'delivered':
-                    ticksElement.innerHTML = '✓✓';
-                    break;
-                case 'seen':
-                    ticksElement.innerHTML = '✓✓';
-                    ticksElement.classList.add('seen');
-                    break;
-                default:
-                    ticksElement.innerHTML = '';
-            }
-        }
-        
-        function removeMessageFromUI(messageId) {
-            const messageEl = document.getElementById(`msg-${messageId}`);
-            if(messageEl) {
-                gsap.to(messageEl, { 
-                    opacity: 0, 
-                    height: 0, 
-                    paddingTop: 0, 
-                    paddingBottom: 0,
-                    marginTop: 0, 
-                    marginBottom: 0,
-                    duration: 0.5, 
-                    onComplete: () => messageEl.remove() 
-                });
-            }
+        function clearChatView() {
+            currentChatId = null;
+            if (messageListener) off(messageListener.ref, messageListener.type);
+            if (typingListener) off(typingListener.ref, typingListener.type);
+            chatView.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            document.querySelectorAll('.conversation-item.active').forEach(el => el.classList.remove('active'));
         }
 
         // ----- 4. CORE FIREBASE LOGIC -----
         
-        // --- Authentication Listener (Main App Controller) ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 currentUser = user;
                 gsap.to(landingPage, { opacity: 0, duration: 0.5, onComplete: () => landingPage.classList.add('hidden') });
                 chatApp.classList.remove('hidden');
                 gsap.from(chatApp, { opacity: 0, duration: 0.5, delay: 0.5 });
-                initChat();
+                initChatApp();
             } else {
                 currentUser = null;
+                // Cleanup all listeners
+                if (conversationsListener) off(conversationsListener.ref, conversationsListener.type);
+                if (messageListener) off(messageListener.ref, messageListener.type);
+                if (typingListener) off(typingListener.ref, typingListener.type);
+
+                landingPage.style.opacity = '1';
                 landingPage.classList.remove('hidden');
-                landingPage.style.opacity = 1;
                 chatApp.classList.add('hidden');
-                // Cleanup listeners if any
             }
         });
 
-        // --- Chat Initialization & Data Listeners ---
-        function initChat() {
-            messagesContainer.innerHTML = '';
+        function initChatApp() {
+            currentUserNameEl.textContent = currentUser.displayName;
             setupPresence();
-            listenForUsers();
-            listenForMessages();
-            listenForTyping();
+            listenForUsers(); // Cache all users for display info
+            listenForConversations();
         }
-
+        
         function setupPresence() {
             const userStatusRef = ref(db, `users/${currentUser.uid}`);
-            const presenceRef = ref(db, '.info/connected');
-
-            onValue(presenceRef, (snap) => {
-                if (snap.val() === true) {
-                    const statusUpdate = {
-                        isOnline: true,
-                        last_active: serverTimestamp(),
-                        displayName: currentUser.displayName,
-                        email: currentUser.email
-                    };
-                    set(userStatusRef, statusUpdate);
-
-                    onDisconnect(userStatusRef).update({
-                        isOnline: false,
-                        last_active: serverTimestamp()
-                    });
-                }
+            onDisconnect(userStatusRef).update({ isOnline: false, last_active: serverTimestamp() });
+            update(userStatusRef, { 
+                displayName: currentUser.displayName, 
+                email: currentUser.email,
+                isOnline: true, 
+                last_active: serverTimestamp() 
             });
         }
-
+        
         function listenForUsers() {
             const usersRef = ref(db, 'users');
             onValue(usersRef, (snapshot) => {
-                const users = snapshot.val() || {};
-                renderUserList(users);
+                allUsersCache = snapshot.val() || {};
             });
         }
 
-        function listenForMessages() {
-            const messagesRef = ref(db, `messages/${CHAT_ID}`);
+        function listenForConversations() {
+            if(conversationsListener) off(conversationsListener.ref, conversationsListener.type);
+            const userChatsRef = ref(db, `userChats/${currentUser.uid}`);
             
-            onValue(messagesRef, (snapshot) => {
-                const allMessages = snapshot.val() || {};
-                const messagesToUpdate = {};
+            conversationsListener = { ref: userChatsRef, type: 'value' };
+            onValue(userChatsRef, async (snapshot) => {
+                if (!snapshot.exists()) {
+                    renderConversations([]);
+                    return;
+                }
+                const chatIds = Object.keys(snapshot.val());
+                const chatPromises = chatIds.map(id => get(child(ref(db), `chats/${id}`)));
+                const chatSnapshots = await Promise.all(chatPromises);
+
+                const chatsData = chatSnapshots
+                    .filter(snap => snap.exists())
+                    .map(snap => ({ id: snap.key, ...snap.val() }));
                 
-                messagesContainer.innerHTML = ''; // Simple re-render for this demo
-                const sortedMessages = Object.entries(allMessages).sort(([, a], [, b]) => a.timestamp - b.timestamp);
-
-                for (const [id, msg] of sortedMessages) {
-                    renderMessage(id, msg);
-                    // If message is not from me and is not 'seen' yet, mark it for update
-                    if (msg.senderId !== currentUser.uid && msg.status !== 'seen') {
-                        messagesToUpdate[`${id}/status`] = 'seen';
-                    }
-                }
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                // Batch update all newly seen messages
-                if (Object.keys(messagesToUpdate).length > 0) {
-                    update(messagesRef, messagesToUpdate);
-                }
+                renderConversations(chatsData);
             });
         }
         
-        function listenForTyping() {
-            const typingRef = ref(db, `typing/${CHAT_ID}`);
+        function listenForMessages(chatId, isGroup) {
+            if (messageListener) off(messageListener.ref, messageListener.type);
+            messagesContainer.innerHTML = '';
             
+            const messagesRef = ref(db, `messages/${chatId}`);
+            messageListener = { ref: messagesRef, type: 'value' };
+
+            onValue(messagesRef, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                if (!snapshot.exists()) return;
+
+                const updates = {};
+                const sortedMessages = [];
+                snapshot.forEach(child => sortedMessages.push({ id: child.key, ...child.val() }));
+                sortedMessages.sort((a,b) => a.timestamp - b.timestamp);
+
+                sortedMessages.forEach(msg => {
+                    const isSent = msg.senderId === currentUser.uid;
+                    const bubble = document.createElement('div');
+                    bubble.className = `message-bubble ${isSent ? 'sent' : 'received'}`;
+                    
+                    const senderNameHTML = !isSent && isGroup ? `<div class="sender-name">${allUsersCache[msg.senderId]?.displayName || '...'}</div>` : '';
+                    const ticksHTML = isSent ? `<span class="message-status-ticks"></span>` : '';
+
+                    bubble.innerHTML = `
+                        ${senderNameHTML}
+                        <p>${msg.text}</p>
+                        <span class="message-meta">
+                            <span>${formatTimestamp(msg.timestamp)}</span>
+                            ${ticksHTML}
+                        </span>`;
+                    messagesContainer.appendChild(bubble);
+
+                    const ticksElement = bubble.querySelector('.message-status-ticks');
+                    if (ticksElement) {
+                        ticksElement.classList.remove('seen');
+                        if (msg.status === 'seen') { ticksElement.innerHTML = '✓✓'; ticksElement.classList.add('seen'); }
+                        else if (msg.status === 'delivered') { ticksElement.innerHTML = '✓✓'; } // 'delivered' is hard without server logic, so we just show 2 ticks. 'seen' provides more value.
+                        else { ticksElement.innerHTML = '✓'; }
+                    }
+
+                    if (!isSent && msg.status !== 'seen') {
+                        updates[`/messages/${chatId}/${msg.id}/status`] = 'seen';
+                    }
+                });
+                
+                if (Object.keys(updates).length > 0) update(ref(db), updates);
+                gsap.to(messagesContainer, { scrollTop: messagesContainer.scrollHeight, duration: 0.5 });
+            });
+        }
+        
+        function listenForTyping(chatId) {
+            if (typingListener) off(typingListener.ref, typingListener.type);
+            const typingRef = ref(db, `typing/${chatId}`);
+            typingListener = { ref: typingRef, type: 'value' };
             onValue(typingRef, (snapshot) => {
                 const typingUsers = snapshot.val() || {};
                 delete typingUsers[currentUser.uid];
-                
                 const names = Object.values(typingUsers);
-                if (names.length === 0) {
-                    typingIndicator.textContent = '';
-                } else if (names.length === 1) {
-                    typingIndicator.textContent = `${names[0]} is typing...`;
-                } else {
-                    typingIndicator.textContent = `${names.slice(0, 2).join(', ')} and others are typing...`;
-                }
-            });
-
-            let typingTimeout;
-            messageInput.addEventListener('input', () => {
-                const myTypingRef = ref(db, `typing/${CHAT_ID}/${currentUser.uid}`);
-                set(myTypingRef, currentUser.displayName);
-
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => {
-                    remove(myTypingRef);
-                }, 3000);
+                if (names.length === 0) typingIndicator.textContent = '';
+                else if (names.length === 1) typingIndicator.textContent = `${names[0]} is typing...`;
+                else typingIndicator.textContent = `${names.join(', ')} are typing...`;
             });
         }
 
-        // ----- 5. EVENT LISTENERS -----
+        async function createNewChat(selectedUserIds, groupName = '') {
+            const members = [currentUser.uid, ...selectedUserIds];
+            const isGroup = members.length > 2;
 
-        // --- Auth Forms ---
-        loginForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const email = loginForm['login-email'].value;
-            const password = loginForm['login-password'].value;
-            signInWithEmailAndPassword(auth, email, password)
-                .catch(err => { authError.textContent = "Invalid email or password."; });
-        });
-
-        signupForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const name = signupForm['signup-name'].value;
-            const email = signupForm['signup-email'].value;
-            const password = signupForm['signup-password'].value;
-
-            if (name.length < 3) {
-                authError.textContent = 'Display name must be at least 3 characters.';
-                return;
+            const chatData = {
+                members: members.reduce((acc, id) => ({...acc, [id]: true }), {}),
+                createdAt: serverTimestamp(),
+                isGroup: isGroup,
+                lastMessage: { text: 'Chat created', timestamp: serverTimestamp(), senderId: 'system' }
+            };
+            if(isGroup) chatData.groupName = groupName;
+            
+            let chatId;
+            if (isGroup) {
+                chatId = push(child(ref(db), 'chats')).key;
+            } else {
+                chatId = [currentUser.uid, selectedUserIds[0]].sort().join('_');
             }
+            
+            const updates = {};
+            updates[`/chats/${chatId}`] = chatData;
+            members.forEach(id => { updates[`/userChats/${id}/${chatId}`] = true; });
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(userCredential => {
-                    return updateProfile(userCredential.user, { displayName: name });
-                })
-                .catch(err => { 
-                    if (err.code === 'auth/email-already-in-use') {
-                        authError.textContent = 'This email is already in use.';
-                    } else {
-                        authError.textContent = 'Password should be at least 6 characters.';
-                    }
-                });
+            await update(ref(db), updates);
+            return chatId;
+        }
+
+        // ----- 5. EVENT LISTENERS -----
+        loginForm.addEventListener('submit', e => { e.preventDefault(); signInWithEmailAndPassword(auth, loginForm['login-email'].value, loginForm['login-password'].value).catch(err => authError.textContent = "Invalid email or password."); });
+        signupForm.addEventListener('submit', e => { e.preventDefault(); const name = signupForm['signup-name'].value; if (name.length < 3) { authError.textContent = 'Display name minimum 3 characters.'; return; } createUserWithEmailAndPassword(auth, signupForm['signup-email'].value, signupForm['signup-password'].value).then(cred => updateProfile(cred.user, { displayName: name })).catch(err => authError.textContent = err.code.includes('in-use') ? 'Email already in use.' : 'Password minimum 6 characters.'); });
+        showSignupBtn.addEventListener('click', () => { loginForm.classList.add('hidden'); signupForm.classList.remove('hidden'); authError.textContent = ''; });
+        showLoginBtn.addEventListener('click', () => { signupForm.classList.add('hidden'); loginForm.classList.remove('hidden'); authError.textContent = ''; });
+        signOutBtn.addEventListener('click', () => { signOut(auth); });
+        
+        editNameBtn.addEventListener('click', () => {
+            const newName = prompt("Enter your new display name:", currentUser.displayName);
+            if (newName && newName.trim() !== "" && newName.trim().length >= 3 && newName !== currentUser.displayName) {
+                updateProfile(currentUser, { displayName: newName }).then(() => {
+                    update(ref(db, `users/${currentUser.uid}`), { displayName: newName });
+                    currentUserNameEl.textContent = newName;
+                    alert("Name updated successfully!");
+                }).catch(err => alert("Error updating name."));
+            } else if (newName) {
+                alert("Name must be at least 3 characters long.");
+            }
         });
 
-        // --- Message Form ---
         messageForm.addEventListener('submit', e => {
             e.preventDefault();
             const text = messageInput.value.trim();
-            if (!text) return;
+            if (!text || !currentChatId) return;
             
-            const messagesRef = ref(db, `messages/${CHAT_ID}`);
-            const newMessageRef = push(messagesRef);
-
-            set(newMessageRef, {
-                senderId: currentUser.uid,
-                text: text,
-                timestamp: serverTimestamp(),
-                status: 'sent'
-            });
+            const messageData = { senderId: currentUser.uid, text, timestamp: serverTimestamp(), status: 'sent' };
+            const newMessageKey = push(child(ref(db), 'messages')).key;
+            const updates = {};
+            updates[`/messages/${currentChatId}/${newMessageKey}`] = messageData;
+            updates[`/chats/${currentChatId}/lastMessage`] = messageData;
+            update(ref(db), updates);
 
             messageInput.value = '';
+            remove(ref(db, `typing/${currentChatId}/${currentUser.uid}`));
+        });
+        
+        let typingTimeout;
+        messageInput.addEventListener('input', () => {
+            if (!currentChatId) return;
+            const myTypingRef = ref(db, `typing/${currentChatId}/${currentUser.uid}`);
+            set(myTypingRef, currentUser.displayName);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => remove(myTypingRef), 3000);
+        });
+        
+        newChatBtn.addEventListener('click', async () => {
+            const userListEl = newGroupModal.querySelector('.modal-user-list');
+            userListEl.innerHTML = '';
+            Object.entries(allUsersCache).forEach(([uid, user]) => {
+                if (uid !== currentUser.uid) {
+                    userListEl.innerHTML += `<label class="modal-user-item"><input type="checkbox" value="${uid}"><span>${user.displayName}</span></label>`;
+                }
+            });
+            newGroupModal.classList.remove('hidden');
+            gsap.from(newGroupModal.querySelector('.modal-content'), { scale: 0.8, opacity: 0, duration: 0.3 });
+        });
+        
+        createGroupCancelBtn.addEventListener('click', () => newGroupModal.classList.add('hidden'));
+        
+        newGroupForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const selectedUsers = [...newGroupForm.querySelectorAll('input[type="checkbox"]:checked')].map(el => el.value);
+            if (selectedUsers.length === 0) { alert("Please select at least one user."); return; }
             
-            const myTypingRef = ref(db, `typing/${CHAT_ID}/${currentUser.uid}`);
-            remove(myTypingRef);
+            const groupName = newGroupForm.querySelector('#group-name-input').value.trim();
+            if (selectedUsers.length > 1 && !groupName) { alert("Please enter a name for the group."); return; }
+
+            const newChatId = await createNewChat(selectedUsers, groupName);
+            selectChat(newChatId);
+            newGroupModal.classList.add('hidden');
+            newGroupForm.reset();
         });
 
-        // --- General Listeners ---
-        showSignupBtn.addEventListener('click', toggleAuthForms);
-        showLoginBtn.addEventListener('click', toggleAuthForms);
-        signOutBtn.addEventListener('click', () => signOut(auth));
-        
         // ----- 6. LANDING PAGE ANIMATIONS & APP START -----
         function initLandingPageAnimations() {
-            AOS.init({ once: true });
-
-            new Typed('#typed-element', {
-                strings: ['Sintha Chat.', 'Real-time.', 'Secure.', 'Beautiful.'],
-                typeSpeed: 60,
-                backSpeed: 40,
-                loop: true,
-            });
-
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            const renderer = new THREE.WebGLRenderer({ canvas: threeJsCanvas, alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('three-js-canvas').appendChild(renderer.domElement);
-
-            const particlesGeometry = new THREE.BufferGeometry;
-            const particlesCount = 8000;
+            
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 5000;
             const posArray = new Float32Array(particlesCount * 3);
-            for(let i = 0; i < particlesCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 10;
-            }
+            for(let i = 0; i < particlesCount * 3; i++) posArray[i] = (Math.random() - 0.5) * 10;
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
             const particlesMaterial = new THREE.PointsMaterial({ size: 0.008, color: 0x00ffcc });
             const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
             scene.add(particlesMesh);
@@ -842,7 +758,6 @@
 
             const animate = () => {
                 requestAnimationFrame(animate);
-                particlesMesh.rotation.x += 0.0002;
                 particlesMesh.rotation.y += 0.0003;
                 renderer.render(scene, camera);
             };
